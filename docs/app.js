@@ -332,6 +332,78 @@ $(".sheet-backdrop").addEventListener("touchmove", (e) => e.preventDefault(), { 
 })();
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
 
+// --- Pestaña Método: cómo se calcula todo (los puntos se derivan de los pesos del informe)
+const METHOD = [
+  ["valuation", "💰 Valoración: ¿está barata?", [
+    ["PER frente a su sector", 0.40, "Máximo si su PER es la mitad o menos que el de su sector; 0 si es un 20 % más caro o más.", "pe"],
+    ["PEG", 0.32, "Menos de 1 → todos los puntos · 1–1,5 → 62 % · 1,5–2 → 25 % · más de 2 → 0.", "peg"],
+    ["Rentabilidad por flujo de caja libre", 0.28, "Proporcional: 8 % o más da todos los puntos.", null],
+  ]],
+  ["technical", "📉 Sobreventa: ¿ha caído mucho?", [
+    ["RSI 14", 0.40, "0 a partir de 40; máximo con 25 o menos.", "rsi"],
+    ["Caída desde máximos de 52 semanas", 0.32, "0 si cae un 5 % o menos; máximo si cae un 30 % o más.", "drawdown"],
+    ["Distancia a la media de 200 sesiones", 0.28, "Máximo si está un 15 % o más por debajo.", "sma200"],
+  ]],
+  ["quality", "🏛️ Calidad: ¿es un buen negocio?", [
+    ["ROE", 0.32, "Proporcional: 20 % o más da todos los puntos.", "roe"],
+    ["Deuda / patrimonio", 0.28, "Máximo con 50 % o menos; 0 con 200 % o más. A los bancos se les da la mitad fija, porque su deuda no es comparable.", null],
+    ["Margen neto", 0.20, "Proporcional: 15 % o más da todos los puntos.", null],
+    ["Crecimiento del beneficio", 0.20, "Proporcional: 20 % o más da todos los puntos.", null],
+  ]],
+  ["analysts", "👔 Analistas", [
+    ["Potencial hasta el precio objetivo", 0.48, "Proporcional: 30 % o más da todos los puntos.", "upside"],
+    ["Recomendación media", 0.36, "«Compra fuerte» → todos · «Mantener» o peor → 0.", "consensus"],
+    ["Número de analistas", 0.16, "5 o más → todos (con menos, la opinión es poco fiable).", "analysts_n"],
+  ]],
+];
+const TIMING_RULES = [
+  ["El RSI sale de sobreventa", "+2"],
+  ["Acaba de recuperar su media de 20 sesiones (o ya estaba por encima: +1)", "+2"],
+  ["Cruce alcista del MACD", "+1"],
+  ["Día de capitulación (volumen muy alto con caída y sin nuevos mínimos después)", "+1"],
+  ["Lo hace mejor que su índice en 10 sesiones", "+1"],
+  ["Analistas subiendo previsiones de beneficio", "+1"],
+  ["Mínimos de 20 sesiones en los últimos 3 días", "−2"],
+  ["Por debajo de su media de 20 sesiones", "−1"],
+  ["MACD empeorando", "−1"],
+  ["Lo hace peor que su índice", "−1"],
+  ["Presenta resultados en 7 días o menos", "−1"],
+  ["Analistas bajando previsiones de beneficio", "−1"],
+];
+
+function renderMetodo() {
+  const W = report.weights || { valuation: 25, technical: 25, quality: 25, analysts: 25 };
+  const MW = report.market_weight || { US: 1, ES: 0.92, JP: 0.88 };
+  const pts = (x) => (Math.round(x * 10) / 10).toLocaleString("es-ES");
+  let html = `<h2>La nota de 0 a 100 ${infoBtn("score")}</h2>
+    <div class="card"><p class="m-p">Se suman cuatro bloques. Cada bloque reparte sus puntos entre varios datos.</p>
+    <div class="m-bars">${METHOD.map(([k, t]) => `<div class="m-bar"><span>${t.split(":")[0]}</span><b class="num">${W[k]}</b></div>`).join("")}</div></div>`;
+  for (const [k, title, rows] of METHOD) {
+    html += `<h2>${title.replace(/^\S+ /, "")} · ${W[k]} puntos</h2><div class="list">${rows.map(([name, frac, how, g]) => `
+      <div class="m-row"><div class="m-head"><span>${name} ${g ? infoBtn(g) : ""}</span><b class="num">${pts(frac * W[k])} pts</b></div>
+      <div class="m-track"><i style="width:${frac * 100}%"></i></div><small>${how}</small></div>`).join("")}</div>`;
+  }
+  html += `<h2>Reglas generales</h2><div class="card"><ul class="reasons">
+    <li>Si a una empresa le falta más del 40 % de los datos, se descarta.</li>
+    <li>Solo cuenta como «oportunidad» con <b>${report.min_score ?? 45} puntos o más</b>.</li>
+    <li>Prioridad por mercado al ordenar el ranking global: 🇺🇸 ×${pts(MW.US)} · 🇪🇸 ×${pts(MW.ES)} · 🇯🇵 ×${pts(MW.JP)}. La ficha muestra la nota sin multiplicar.</li>
+  </ul></div>`;
+  html += `<h2>Momento de entrada ${infoBtn("timing")}</h2><div class="card">
+    <p class="m-p">Es aparte de la nota: no la cambia. Suma puntos según estas señales:</p>
+    <div class="m-timing">${TIMING_RULES.map(([t, p]) => `<div><span>${t}</span><b class="${p.startsWith("+") ? "up" : "down"} num">${p}</b></div>`).join("")}</div>
+    <p class="m-p" style="margin-top:12px">${timingPill({ label: "giro" })} 3 o más · ${timingPill({ label: "vigilar" })} 1 o 2 · ${timingPill({ label: "esperar" })} 0 o menos</p></div>`;
+  html += `<h2>Modo básico (sin cifras)</h2><div class="card"><ul class="reasons">
+    <li><b>Posible ganancia alta:</b> potencial del 30 % o más con al menos 5 analistas. <b>Media:</b> potencial del 12 % o más, o una valoración muy barata. <b>Baja:</b> el resto.</li>
+    <li><b>Riesgo:</b> suma puntos por volatilidad muy alta (+2) o alta (+1), «Esperar» (+1), caída muy rápida (+1), pérdidas (+2), deuda alta (+1), caída de más del 35 % (+1) y noticias malas (+1). Con 4 o más, o si el precio se mueve con muchísima fuerza: <b>alto</b>. Con 2 o 3: <b>medio</b>. Con menos: <b>bajo</b>.</li>
+  </ul></div>`;
+  html += `<h2>Limitaciones</h2><div class="card"><ul class="reasons">
+    <li>Premia mucho las caídas fuertes: una acción que se desploma suma puntos en sobreventa y en potencial. Por eso existe la etiqueta de momento.</li>
+    <li>Los datos vienen de fuentes gratuitas (Yahoo Finance, FRED, Google News) y pueden tener errores o retrasos.</li>
+    <li>Son reglas fijas, no predicciones. Es un filtro para decidir qué mirar, no una recomendación de compra.</li>
+  </ul></div>`;
+  $("#tab-metodo").innerHTML = html;
+}
+
 // --- Vista básica (lenguaje sencillo, sin cifras)
 const COUNTRY = { US: "Estados Unidos", ES: "España", JP: "Japón" };
 const LEVEL3 = { baja: 1, media: 2, alta: 3, bajo: 1, medio: 2, alto: 3 };
@@ -373,6 +445,16 @@ function renderBasico() {
       ${o.isin ? trButton(o.isin) : ""}
     </article>`;
   }
+  html += `<details class="b-card b-how"><summary>¿Cómo elige la app estas empresas?</summary>
+    <p>Cada día revisa unas 780 empresas grandes de Estados Unidos, España y Japón y les pone una nota mirando cuatro cosas, todas con la misma importancia:</p>
+    <ul class="b-list yes">
+      <li><b>Si está barata</b> comparada con lo que gana y con empresas parecidas.</li>
+      <li><b>Si ha bajado mucho</b> de precio últimamente.</li>
+      <li><b>Si es un buen negocio:</b> que gane dinero, que no tenga muchas deudas y que crezca.</li>
+      <li><b>Qué opinan los expertos</b> que la siguen.</li>
+    </ul>
+    <p>Aparte, mira si la caída parece haberse frenado («buen momento») o si sigue bajando («mejor esperar»). Da algo más de prioridad a las empresas de Estados Unidos.</p>
+  </details>`;
   html += `<div class="b-card b-warn"><p><strong>Recuerda:</strong> esto no es un consejo de inversión, solo un resumen automático.
     Invierte únicamente dinero que no vayas a necesitar, no lo pongas todo en una sola empresa y, si tienes dudas, pregunta antes de comprar.</p></div>`;
   $("#tab-basico").innerHTML = html;
@@ -418,6 +500,7 @@ function renderAll() {
   renderMercados();
   renderBolsas();
   renderEconomia();
+  renderMetodo();
   renderBasico();
   applyMode();
 }

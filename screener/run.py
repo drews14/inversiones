@@ -578,6 +578,7 @@ def main():
         "analyzed": len(df),
         "candidates": len(cand),
         "weights": C.WEIGHTS,
+        "min_score": C.MIN_SCORE,
         "market_weight": C.MARKET_WEIGHT,
         "markets": markets,
         "sentiment": sentiment(prices, uni, markets),

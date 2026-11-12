@@ -220,3 +220,19 @@ body.basic { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .b-list.warn li::before { content: "!"; position: absolute; left: 8px; color: var(--warn); font-weight: 800; }
 .when-good { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14px; }
 .when-good ul { margin-top: 4px; }
+
+/* Pestaña Método */
+.m-p { margin: 0; font-size: 14px; color: var(--muted); }
+.m-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.m-bar { display: flex; justify-content: space-between; background: var(--card-2); border-radius: 10px; padding: 8px 10px; font-size: 14px; }
+.m-row { padding: 12px 14px; }
+.m-head { display: flex; justify-content: space-between; gap: 8px; font-size: 15px; }
+.m-track { height: 6px; background: var(--card-2); border-radius: 3px; margin: 6px 0; overflow: hidden; }
+.m-track i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.m-row small { color: var(--muted); font-size: 13px; line-height: 1.4; display: block; }
+.m-timing { margin-top: 10px; font-size: 14px; }
+.m-timing div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.m-timing div:last-child { border-bottom: 0; }
+.tabbar button { font-size: 10px; }
+.b-how summary { font-weight: 700; cursor: pointer; }
+.b-how[open] summary { margin-bottom: 8px; }
