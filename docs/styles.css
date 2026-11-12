@@ -118,13 +118,19 @@ h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: v
 .tabbar button.active { color: var(--accent); }
 
 /* Hoja de detalle */
-.sheet { position: fixed; inset: 0; z-index: 10; }
-.sheet-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .4); }
-.sheet-panel { position: absolute; left: 0; right: 0; bottom: 0; max-height: 88vh; overflow-y: auto; background: var(--bg);
+body.locked { position: fixed; left: 0; right: 0; overflow: hidden; }
+.sheet { position: fixed; inset: 0; z-index: 10; overscroll-behavior: contain; }
+.sheet-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .4); touch-action: none; transition: opacity .2s; }
+.sheet-panel { position: absolute; left: 0; right: 0; bottom: 0; max-height: 88vh; max-height: 88dvh; overflow-y: auto; background: var(--bg);
+  overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y;
   border-radius: 20px 20px 0 0; padding: 8px 16px calc(24px + env(safe-area-inset-bottom)); max-width: 720px; margin: 0 auto;
   animation: up .25s ease-out; }
 @keyframes up { from { transform: translateY(40px); opacity: 0; } }
-.sheet-grip { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 4px auto 12px; }
+.sheet-panel.dragging { transition: none; }
+.sheet-panel.snap { transition: transform .22s ease-out; }
+.sheet-top { position: sticky; top: -8px; z-index: 2; background: var(--bg); margin: -8px -16px 0; padding: 8px 16px 4px; height: 50px; display: flex; justify-content: center; align-items: flex-start; }
+.sheet-grip { width: 40px; height: 5px; border-radius: 3px; background: var(--muted); opacity: .5; margin: 4px auto 8px; }
+.sheet-close { position: absolute; right: 12px; top: 6px; width: 30px; height: 30px; border-radius: 15px; background: var(--card-2); color: var(--muted); font-size: 15px; line-height: 30px; }
 .detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .detail-head h3 { margin: 0; font-size: 24px; }
 .bars .bar { margin: 10px 0; }

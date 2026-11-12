@@ -170,12 +170,74 @@ function openDetail(o) {
     ${(o.news || []).length ? `<h2>Noticias</h2>${newsList(o.news)}` : ""}
     <p class="disclaimer">Datos de Yahoo Finance, FRED y Google News. Pueden tener retrasos o errores.</p>`;
   const sh = $("#sheet");
+  if (sh.hidden) lockScroll();
   sh.hidden = false;
-  sh.querySelector(".sheet-panel").scrollTop = 0;
+  const panel = sh.querySelector(".sheet-panel");
+  panel.style.transform = "";
+  panel.scrollTop = 0;
 }
 
-function closeSheet() { $("#sheet").hidden = true; }
-$("#sheet").addEventListener("click", (e) => { if (e.target.classList.contains("sheet-backdrop")) closeSheet(); });
+// --- Bloqueo del fondo: en iOS Safari overflow:hidden no basta, hay que fijar el body
+let savedScrollY = 0;
+function lockScroll() {
+  savedScrollY = window.scrollY;
+  document.body.style.top = `-${savedScrollY}px`;
+  document.body.classList.add("locked");
+}
+function unlockScroll() {
+  document.body.classList.remove("locked");
+  document.body.style.top = "";
+  window.scrollTo(0, savedScrollY);
+}
+
+function closeSheet() {
+  const sh = $("#sheet");
+  if (sh.hidden) return;
+  sh.hidden = true;
+  sh.querySelector(".sheet-panel").style.transform = "";
+  sh.querySelector(".sheet-backdrop").style.opacity = "";
+  unlockScroll();
+}
+$("#sheet").addEventListener("click", (e) => {
+  if (e.target.classList.contains("sheet-backdrop") || e.target.closest(".sheet-close")) closeSheet();
+});
+// El fondo oscuro no debe desplazar nada
+$(".sheet-backdrop").addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+
+// --- Deslizar hacia abajo para cerrar (solo cuando la ficha está arriba del todo)
+(() => {
+  const panel = $(".sheet-panel"), backdrop = $(".sheet-backdrop");
+  let startY = 0, dy = 0, dragging = false, armed = false;
+  panel.addEventListener("touchstart", (e) => {
+    startY = e.touches[0].clientY; dy = 0; dragging = false;
+    armed = panel.scrollTop <= 0;
+  }, { passive: true });
+  panel.addEventListener("touchmove", (e) => {
+    if (!armed) return;
+    dy = e.touches[0].clientY - startY;
+    if (dy > 0) {
+      dragging = true;
+      e.preventDefault(); // evita el rebote que arrastraba la página de atrás
+      panel.classList.add("dragging"); panel.classList.remove("snap");
+      panel.style.transform = `translateY(${dy}px)`;
+      backdrop.style.opacity = String(Math.max(0.2, 1 - dy / 400));
+    } else if (dragging) {
+      panel.style.transform = "";
+    }
+  }, { passive: false });
+  panel.addEventListener("touchend", () => {
+    if (!dragging) return;
+    panel.classList.remove("dragging"); panel.classList.add("snap");
+    if (dy > 110) {
+      panel.style.transform = "translateY(100%)";
+      setTimeout(closeSheet, 200);
+    } else {
+      panel.style.transform = "";
+      backdrop.style.opacity = "";
+    }
+    dragging = false;
+  });
+})();
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
 
 function setTab(name) {
