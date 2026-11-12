@@ -414,7 +414,10 @@ def main():
     js = json.dumps(clean(report), ensure_ascii=False, default=str, allow_nan=False)
     (OUT / "report.json").write_text(js)
     (OUT / "history" / f"{now:%Y-%m-%d}.json").write_text(js)
-    idx = sorted(p.stem for p in (OUT / "history").glob("*.json"))[-60:]
+    days = sorted(p.stem for p in (OUT / "history").glob("20*.json"))
+    for old_day in days[:-60]:  # conserva solo los últimos 60 informes
+        (OUT / "history" / f"{old_day}.json").unlink()
+    idx = days[-60:]
     (OUT / "history" / "index.json").write_text(json.dumps(idx))
     print(f"OK: {len(df)} analizadas, {len(cand)} candidatas. Top: {', '.join(top.ticker.head(5))}")
 
