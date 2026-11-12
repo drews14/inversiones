@@ -5,7 +5,8 @@ MARKET_WEIGHT = {"US": 1.00, "ES": 0.92, "JP": 0.88}
 MARKET_LABEL = {"US": "EE. UU.", "ES": "España", "JP": "Japón"}
 
 # Peso de cada bloque (suman 100).
-WEIGHTS = {"valuation": 25, "technical": 25, "quality": 25, "analysts": 25}
+# Más peso a calidad y valoración, menos a la caída: el timing lo cubre la etiqueta de momento.
+WEIGHTS = {"valuation": 30, "technical": 15, "quality": 30, "analysts": 25}
 
 # Cuántas empresas mostrar.
 TOP_GLOBAL = 5

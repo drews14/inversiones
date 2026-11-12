@@ -397,7 +397,7 @@ function renderMetodo() {
     <li><b>Riesgo:</b> suma puntos por volatilidad muy alta (+2) o alta (+1), «Esperar» (+1), caída muy rápida (+1), pérdidas (+2), deuda alta (+1), caída de más del 35 % (+1) y noticias malas (+1). Con 4 o más, o si el precio se mueve con muchísima fuerza: <b>alto</b>. Con 2 o 3: <b>medio</b>. Con menos: <b>bajo</b>.</li>
   </ul></div>`;
   html += `<h2>Limitaciones</h2><div class="card"><ul class="reasons">
-    <li>Premia mucho las caídas fuertes: una acción que se desploma suma puntos en sobreventa y en potencial. Por eso existe la etiqueta de momento.</li>
+    <li>Una acción que se desploma sigue sumando algo en sobreventa y en potencial de analistas. Por eso la sobreventa pesa poco y existe la etiqueta de momento.</li>
     <li>Los datos vienen de fuentes gratuitas (Yahoo Finance, FRED, Google News) y pueden tener errores o retrasos.</li>
     <li>Son reglas fijas, no predicciones. Es un filtro para decidir qué mirar, no una recomendación de compra.</li>
   </ul></div>`;
@@ -446,12 +446,12 @@ function renderBasico() {
     </article>`;
   }
   html += `<details class="b-card b-how"><summary>¿Cómo elige la app estas empresas?</summary>
-    <p>Cada día revisa unas 780 empresas grandes de Estados Unidos, España y Japón y les pone una nota mirando cuatro cosas, todas con la misma importancia:</p>
+    <p>Cada día revisa unas 780 empresas grandes de Estados Unidos, España y Japón y les pone una nota mirando cuatro cosas, de más a menos importante:</p>
     <ul class="b-list yes">
-      <li><b>Si está barata</b> comparada con lo que gana y con empresas parecidas.</li>
-      <li><b>Si ha bajado mucho</b> de precio últimamente.</li>
       <li><b>Si es un buen negocio:</b> que gane dinero, que no tenga muchas deudas y que crezca.</li>
+      <li><b>Si está barata</b> comparada con lo que gana y con empresas parecidas.</li>
       <li><b>Qué opinan los expertos</b> que la siguen.</li>
+      <li><b>Si ha bajado de precio</b> últimamente (cuenta menos que lo demás).</li>
     </ul>
     <p>Aparte, mira si la caída parece haberse frenado («buen momento») o si sigue bajando («mejor esperar»). Da algo más de prioridad a las empresas de Estados Unidos.</p>
   </details>`;

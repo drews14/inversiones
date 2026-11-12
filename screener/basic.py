@@ -1,6 +1,8 @@
 """Modo básico: explicaciones en lenguaje sencillo, sin cifras, para quien no sabe de bolsa."""
 import re
 
+import config as C
+
 SECTOR_ES = {
     "Technology": "tecnología",
     "Healthcare": "salud y farmacia",
@@ -75,7 +77,8 @@ def volatility(close):
 
 def company(r, info, close, news_es, bench_chg1m=None):
     """Devuelve el bloque 'basic' de una empresa."""
-    b = r.get("blocks") or {}
+    pts = r.get("blocks") or {}
+    b = {k: pts.get(k, 0) / C.WEIGHTS[k] for k in C.WEIGHTS}  # fracción 0..1 de cada bloque
     t = r.get("timing") or {}
     flags = " ".join(r.get("flags") or [])
     neg_sig = " ".join(t.get("negative") or [])
@@ -90,9 +93,9 @@ def company(r, info, close, news_es, bench_chg1m=None):
     tone = news_tone(news_es + relevant(r.get("news") or [], r.get("name"), r.get("ticker", "")))
 
     yes, no = [], []
-    if b.get("valuation", 0) >= 15:
+    if b["valuation"] >= 0.6:
         yes.append("Está más barata que otras empresas parecidas, comparando lo que cuesta con lo que gana.")
-    if b.get("quality", 0) >= 17 and (margin or 0) > 0:
+    if b["quality"] >= 0.68 and (margin or 0) > 0:
         yes.append("Es un negocio que gana dinero de forma sólida.")
     if up and up > 0.15 and n_an >= 5:
         yes.append("Los expertos que la siguen creen que su precio puede subir.")
@@ -179,7 +182,7 @@ def company(r, info, close, news_es, bench_chg1m=None):
     # Posible ganancia (sin cifras)
     if up and up >= 0.30 and n_an >= 5:
         gain = "alta"
-    elif (up and up >= 0.12) or b.get("valuation", 0) >= 18:
+    elif (up and up >= 0.12) or b["valuation"] >= 0.72:
         gain = "media"
     else:
         gain = "baja"
