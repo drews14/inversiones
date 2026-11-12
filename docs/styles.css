@@ -137,8 +137,10 @@ body.locked { position: fixed; left: 0; right: 0; overflow: hidden; }
 .bars .bar-top { display: flex; justify-content: space-between; font-size: 13px; }
 .bars .track { height: 6px; background: var(--card-2); border-radius: 3px; margin-top: 4px; overflow: hidden; }
 .bars .fill { height: 100%; background: var(--accent); border-radius: 3px; }
-.kv { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 14px; }
-.kv div { display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; border-bottom: 1px solid var(--line); padding: 6px 0; }
+.kv { display: grid; grid-template-columns: 1fr; gap: 0; font-size: 15px; padding-top: 4px; padding-bottom: 4px; }
+.kv div { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); padding: 10px 0; min-width: 0; }
+.kv div:last-child { border-bottom: 0; }
+.kv span:last-child { text-align: right; font-weight: 600; }
 .kv span:first-child { color: var(--muted); }
 svg.spark { display: block; width: 100%; height: 64px; }
 ul.reasons { margin: 0; padding-left: 18px; }
@@ -193,8 +195,8 @@ body.basic { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .b-moment.b-vigilar { background: var(--warn-soft); color: var(--warn); }
 .b-list { margin: 0; padding-left: 0; list-style: none; }
 .b-list li { margin: 6px 0; padding-left: 26px; position: relative; }
-.b-list.yes li::before { content: "✓"; position: absolute; left: 4px; color: var(--up); font-weight: 700; }
-.b-list.no li::before { content: "✗"; position: absolute; left: 4px; color: var(--down); font-weight: 700; }
+.b-list.yes li::before { content: "▲"; position: absolute; left: 4px; font-size: 13px; color: var(--up); font-weight: 700; }
+.b-list.no li::before { content: "▼"; position: absolute; left: 4px; font-size: 13px; color: var(--down); font-weight: 700; }
 .b-news { margin: 6px 0 0; padding-left: 18px; font-size: 15px; }
 .b-news li { margin: 6px 0; }
 .b-news a { color: var(--text); text-decoration: underline; text-decoration-color: var(--line); }
@@ -236,3 +238,9 @@ body.basic { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .tabbar button { font-size: 10px; }
 .b-how summary { font-weight: 700; cursor: pointer; }
 .b-how[open] summary { margin-bottom: 8px; }
+
+.mk { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .04em; padding: 1px 5px; border-radius: 5px;
+  background: var(--card-2); color: var(--muted); vertical-align: 2px; margin-right: 2px; }
+
+.tabbar button svg { display: block; margin-bottom: 1px; }
+.sheet-close { display: grid; place-items: center; }

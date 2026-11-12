@@ -468,7 +468,7 @@ def notify(report):
         print("NTFY_TOPIC no definido: no se envía notificación")
         return
     top = report["top"][:3]
-    tag = {"giro": "🟢 giro", "vigilar": "🟡 vigilar", "esperar": "⚪ esperar"}
+    tag = {"giro": "· giro", "vigilar": "· vigilar", "esperar": "· esperar"}
     lines = [f"{o['ticker']} {o['score']:.0f}/100 {tag.get((o.get('timing') or {}).get('label'), '')} · {o['name']}"
              for o in top] or ["Hoy no hay oportunidades claras."]
     m = {x["id"]: x for x in report["macro"]}
@@ -477,8 +477,7 @@ def notify(report):
     vix = next((x for x in report["markets"] if x["ticker"] == "^VIX"), None)
     if vix:
         lines.append(f"VIX: {vix['value']}")
-    headers = {"Title": f"Informe {report['date_label']}: {len(report['top'])} oportunidades",
-               "Tags": "chart_with_upwards_trend"}
+    headers = {"Title": f"Informe {report['date_label']}: {len(report['top'])} oportunidades"}
     if os.environ.get("APP_URL"):
         headers["Click"] = os.environ["APP_URL"]
     requests.post(f"https://ntfy.sh/{topic}", data="\n".join(lines).encode(), headers=headers, timeout=30)

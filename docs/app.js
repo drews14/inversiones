@@ -1,6 +1,6 @@
 "use strict";
 
-const FLAG = { US: "🇺🇸", ES: "🇪🇸", JP: "🇯🇵" };
+const FLAG = { US: `<span class="mk">US</span>`, ES: `<span class="mk">ES</span>`, JP: `<span class="mk">JP</span>` };
 const BLOCK_LABEL = { valuation: "Valoración", technical: "Sobreventa técnica", quality: "Calidad / fiabilidad", analysts: "Consenso analistas" };
 const TIMING = {
   giro: { text: "Señal de giro", cls: "t-giro", help: "Hay señales de que la caída se está frenando." },
@@ -13,8 +13,8 @@ const REC = { strong_buy: "Compra fuerte", buy: "Comprar", hold: "Mantener", und
 // La app de Trade Republic no tiene enlaces directos públicos: copiamos el ISIN y abrimos la App Store,
 // donde el botón «Abrir» lanza la app; allí basta con pegar el ISIN en el buscador.
 const TR_APPSTORE = "https://apps.apple.com/es/app/id1410703839";
-const trButton = (isin) => `<button class="btn primary" data-tr="${esc(isin)}">Copiar ISIN y abrir Trade Republic</button>
-  <p class="tr-help">Se copia el código de la empresa. En la pantalla que se abre pulsa <b>Abrir</b> y, dentro de Trade Republic, pega el código en el buscador 🔍.</p>`;
+const trButton = (isin) => `<a class="btn primary" data-tr="${esc(isin)}" href="${TR_APPSTORE}">Copiar ISIN y abrir Trade Republic</a>
+  <p class="tr-help">Se copia el código de la empresa. En la pantalla que se abre pulsa <b>Abrir</b> y, dentro de Trade Republic, pega el código en el buscador (la lupa).</p>`;
 
 function toast(msg) {
   let t = document.querySelector(".toast");
@@ -25,13 +25,28 @@ function toast(msg) {
   toast._t = setTimeout(() => t.classList.remove("show"), 2500);
 }
 
-document.addEventListener("click", async (e) => {
-  const b = e.target.closest("[data-tr]");
-  if (!b) return;
-  e.preventDefault();
-  try { await navigator.clipboard.writeText(b.dataset.tr); toast(`ISIN ${b.dataset.tr} copiado`); } catch {}
-  setTimeout(() => { window.location.href = TR_APPSTORE; }, 350);
-});
+// iOS solo abre otra app si la navegación ocurre en el mismo toque: es un enlace normal
+// y el ISIN se copia de forma síncrona en ese mismo toque (sin esperas).
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("[data-tr]");
+  if (!a) return;
+  copyText(a.dataset.tr);
+  toast(`ISIN ${a.dataset.tr} copiado`);
+}, true);
+
+function copyText(text) {
+  try {
+    if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(text).catch(() => fallbackCopy(text)); return; }
+  } catch {}
+  fallbackCopy(text);
+}
+function fallbackCopy(text) {
+  const t = document.createElement("textarea");
+  t.value = text; t.setAttribute("readonly", ""); t.style.position = "fixed"; t.style.opacity = "0";
+  document.body.appendChild(t); t.select(); t.setSelectionRange(0, text.length);
+  try { document.execCommand("copy"); } catch {}
+  t.remove();
+}
 
 let report = null;
 let viewingDate = null; // null = informe de hoy
@@ -62,7 +77,7 @@ function spark(values, { w = 300, h = 64, color } = {}) {
 
 function oppRow(o, i) {
   const chips = (o.reasons || []).slice(0, 2).map((r) => `<span class="chip">${esc(r)}</span>`).join("")
-    + (o.flags || []).slice(0, 1).map((f) => `<span class="chip warn">⚠ ${esc(f)}</span>`).join("");
+    + (o.flags || []).slice(0, 1).map((f) => `<span class="chip warn">${esc(f)}</span>`).join("");
   return `<button class="opp" data-i="${i}">
     <div class="ring" style="--p:${o.score}"><span class="num">${Math.round(o.score)}</span></div>
     <div class="opp-main">
@@ -109,7 +124,7 @@ function renderHoy() {
 function renderMercados() {
   const el = $("#tab-mercados");
   const list = report.by_market?.[marketSel] || [];
-  el.innerHTML = `<div class="seg">${["US", "ES", "JP"].map((m) => `<button data-m="${m}" class="${m === marketSel ? "active" : ""}">${FLAG[m]} ${{ US: "EE. UU.", ES: "España", JP: "Japón" }[m]}</button>`).join("")}</div>
+  el.innerHTML = `<div class="seg">${["US", "ES", "JP"].map((m) => `<button data-m="${m}" class="${m === marketSel ? "active" : ""}">${{ US: "EE. UU.", ES: "España", JP: "Japón" }[m]}</button>`).join("")}</div>
     <h2>Mejores de ${{ US: "S&P 500 / Nasdaq 100", ES: "IBEX 35", JP: "Nikkei 225" }[marketSel]}</h2>
     ${list.length ? `<div class="list" id="mk-list">${list.map(oppRow).join("")}</div>` : `<div class="card empty">Sin candidatas hoy.</div>`}`;
   el.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => { marketSel = b.dataset.m; renderMercados(); }));
@@ -255,7 +270,7 @@ function closeSheet() {
 $("#sheet").addEventListener("click", async (e) => {
   const cp = e.target.closest("[data-copy]");
   if (cp) {
-    try { await navigator.clipboard.writeText(cp.dataset.copy); cp.textContent = "ISIN copiado ✓"; }
+    try { await navigator.clipboard.writeText(cp.dataset.copy); cp.textContent = "ISIN copiado"; }
     catch { cp.textContent = cp.dataset.copy; }
     return;
   }
@@ -334,23 +349,23 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet
 
 // --- Pestaña Método: cómo se calcula todo (los puntos se derivan de los pesos del informe)
 const METHOD = [
-  ["valuation", "💰 Valoración: ¿está barata?", [
+  ["valuation", "Valoración: ¿está barata?", [
     ["PER frente a su sector", 0.40, "Máximo si su PER es la mitad o menos que el de su sector; 0 si es un 20 % más caro o más.", "pe"],
     ["PEG", 0.32, "Menos de 1 → todos los puntos · 1–1,5 → 62 % · 1,5–2 → 25 % · más de 2 → 0.", "peg"],
     ["Rentabilidad por flujo de caja libre", 0.28, "Proporcional: 8 % o más da todos los puntos.", null],
   ]],
-  ["technical", "📉 Sobreventa: ¿ha caído mucho?", [
+  ["technical", "Sobreventa: ¿ha caído mucho?", [
     ["RSI 14", 0.40, "0 a partir de 40; máximo con 25 o menos.", "rsi"],
     ["Caída desde máximos de 52 semanas", 0.32, "0 si cae un 5 % o menos; máximo si cae un 30 % o más.", "drawdown"],
     ["Distancia a la media de 200 sesiones", 0.28, "Máximo si está un 15 % o más por debajo.", "sma200"],
   ]],
-  ["quality", "🏛️ Calidad: ¿es un buen negocio?", [
+  ["quality", "Calidad: ¿es un buen negocio?", [
     ["ROE", 0.32, "Proporcional: 20 % o más da todos los puntos.", "roe"],
     ["Deuda / patrimonio", 0.28, "Máximo con 50 % o menos; 0 con 200 % o más. A los bancos se les da la mitad fija, porque su deuda no es comparable.", null],
     ["Margen neto", 0.20, "Proporcional: 15 % o más da todos los puntos.", null],
     ["Crecimiento del beneficio", 0.20, "Proporcional: 20 % o más da todos los puntos.", null],
   ]],
-  ["analysts", "👔 Analistas", [
+  ["analysts", "Analistas", [
     ["Potencial hasta el precio objetivo", 0.48, "Proporcional: 30 % o más da todos los puntos.", "upside"],
     ["Recomendación media", 0.36, "«Compra fuerte» → todos · «Mantener» o peor → 0.", "consensus"],
     ["Número de analistas", 0.16, "5 o más → todos (con menos, la opinión es poco fiable).", "analysts_n"],
@@ -386,7 +401,7 @@ function renderMetodo() {
   html += `<h2>Reglas generales</h2><div class="card"><ul class="reasons">
     <li>Si a una empresa le falta más del 40 % de los datos, se descarta.</li>
     <li>Solo cuenta como «oportunidad» con <b>${report.min_score ?? 50} puntos o más</b>.</li>
-    <li>Prioridad por mercado al ordenar el ranking global: 🇺🇸 ×${pts(MW.US)} · 🇪🇸 ×${pts(MW.ES)} · 🇯🇵 ×${pts(MW.JP)}. La ficha muestra la nota sin multiplicar.</li>
+    <li>Prioridad por mercado al ordenar el ranking global: EE. UU. ×${pts(MW.US)} · España ×${pts(MW.ES)} · Japón ×${pts(MW.JP)}. La ficha muestra la nota sin multiplicar.</li>
   </ul></div>`;
   html += `<h2>Momento de entrada ${infoBtn("timing")}</h2><div class="card">
     <p class="m-p">Es aparte de la nota: no la cambia. Suma puntos según estas señales:</p>
@@ -429,18 +444,18 @@ function renderBasico() {
     const name = o.short && o.market === "ES" ? o.short : String(o.name).replace(/,? (Inc\.?|Corporation|Corp\.?|S\.A\.?|plc|Ltd\.?)$/i, "");
     html += `<article class="b-card">
       <div class="b-head"><div><h3>${esc(name)}</h3>
-        <div class="b-sub">${FLAG[o.market] || ""} ${COUNTRY[o.market] || ""}${b.what ? " · " + esc(b.what) : ""}</div></div></div>
+        <div class="b-sub">${COUNTRY[o.market] || ""}${b.what ? " · " + esc(b.what) : ""}</div></div></div>
       <div class="b-moment b-${esc(o.timing?.label || "")}">${esc(b.moment)}</div>
       ${b.moment_text ? `<p class="b-moment-text">${esc(b.moment_text)}</p>` : ""}
       <div class="meters">${meter("Posible ganancia", b.gain, "gain")}${meter("Riesgo", b.risk, "risk")}</div>
-      <h4>👍 Por qué sí</h4><ul class="b-list yes">${b.why_yes.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
-      ${(b.fall || []).length ? `<h4>📉 Por qué ha bajado</h4>${(b.fall || []).length ? `<ul class="b-list dot">${b.fall.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}` : ""}
-      ${(b.wait || []).length ? `<h4>⏳ Por qué esperar</h4>${(b.wait || []).length ? `<ul class="b-list no">${b.wait.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}` : ""}
-      ${(b.good_now || []).length ? `<h4>✅ Lo que ya va bien</h4>${(b.good_now || []).length ? `<ul class="b-list yes">${b.good_now.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}` : ""}
-      ${(b.when_good || []).length ? `<h4>🔔 Sería mejor momento…</h4>${(b.when_good || []).length ? `<ul class="b-list bell">${b.when_good.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}` : ""}
-      <h4>⚠️ Precaución</h4>
+      <h4>Por qué sí</h4><ul class="b-list yes">${b.why_yes.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+      ${(b.fall || []).length ? `<h4>Por qué ha bajado</h4>${(b.fall || []).length ? `<ul class="b-list dot">${b.fall.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}` : ""}
+      ${(b.wait || []).length ? `<h4>Por qué esperar</h4>${(b.wait || []).length ? `<ul class="b-list no">${b.wait.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}` : ""}
+      ${(b.good_now || []).length ? `<h4>Lo que ya va bien</h4>${(b.good_now || []).length ? `<ul class="b-list yes">${b.good_now.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}` : ""}
+      ${(b.when_good || []).length ? `<h4>Sería mejor momento…</h4>${(b.when_good || []).length ? `<ul class="b-list bell">${b.when_good.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}` : ""}
+      <h4>Precaución</h4>
       <ul class="b-list warn">${(b.caution || b.why_no || []).map((x) => `<li>${esc(x)}</li>`).join("")}<li>Ninguna acción es segura: pon solo una parte pequeña de tus ahorros en cada empresa.</li></ul>
-      <h4>📰 Qué dicen las noticias</h4><p>${esc(b.news_text)}</p>
+      <h4>Qué dicen las noticias</h4><p>${esc(b.news_text)}</p>
       ${b.news.length ? `<ul class="b-news">${b.news.map((n) => `<li><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a></li>`).join("")}</ul>` : ""}
       ${o.isin ? trButton(o.isin) : ""}
     </article>`;
