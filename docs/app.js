@@ -1,5 +1,7 @@
 "use strict";
 
+const APP_VERSION = "10";
+
 const FLAG = { US: `<span class="mk">US</span>`, ES: `<span class="mk">ES</span>`, JP: `<span class="mk">JP</span>` };
 const BLOCK_LABEL = { valuation: "Valoración", technical: "Sobreventa técnica", quality: "Calidad / fiabilidad", analysts: "Consenso analistas" };
 const TIMING = {
@@ -115,7 +117,8 @@ function renderHoy() {
   html += top5.length ? `<div class="list" id="top-list">${top5.map(oppRow).join("")}</div>`
     : `<div class="card empty">Hoy ninguna empresa supera el umbral mínimo.</div>`;
   html += `<p class="disclaimer">Analizadas ${r.analyzed} de ${r.universe_size} empresas · ${r.candidates} superan el umbral.
-    Esto es un filtro automático según tus criterios, no una recomendación de inversión. Revisa siempre cada empresa antes de decidir.</p>`;
+    Esto es un filtro automático según tus criterios, no una recomendación de inversión. Revisa siempre cada empresa antes de decidir.
+    <br>Versión de la app: ${APP_VERSION}</p>`;
   el.innerHTML = html;
   const list = $("#top-list");
   if (list) bindOpps(list, top5);
@@ -471,7 +474,8 @@ function renderBasico() {
     <p>Aparte, mira si la caída parece haberse frenado («buen momento») o si sigue bajando («mejor esperar»). Da algo más de prioridad a las empresas de Estados Unidos.</p>
   </details>`;
   html += `<div class="b-card b-warn"><p><strong>Recuerda:</strong> esto no es un consejo de inversión, solo un resumen automático.
-    Invierte únicamente dinero que no vayas a necesitar, no lo pongas todo en una sola empresa y, si tienes dudas, pregunta antes de comprar.</p></div>`;
+    Invierte únicamente dinero que no vayas a necesitar, no lo pongas todo en una sola empresa y, si tienes dudas, pregunta antes de comprar.</p></div>
+    <p class="disclaimer" style="text-align:center">Versión ${APP_VERSION}</p>`;
   $("#tab-basico").innerHTML = html;
 }
 
@@ -534,4 +538,16 @@ async function openReport(date) {
 $("#refresh").addEventListener("click", () => openReport(null));
 openReport(null);
 
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+// Service worker: busca versión nueva en cada apertura y recarga una vez cuando la instala
+if ("serviceWorker" in navigator) {
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (hadController && !reloaded) { reloaded = true; location.reload(); }
+  });
+  navigator.serviceWorker.register("sw.js", { updateViaCache: "none" })
+    .then((reg) => reg.update()).catch(() => {});
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") navigator.serviceWorker?.getRegistration().then((r) => r?.update()).catch(() => {});
+});
