@@ -1,0 +1,781 @@
+ticker,name,sector,market,index
+1332.T,Nissui Corporation,,JP,Nikkei 225
+1605.T,Inpex Corp.,,JP,Nikkei 225
+1721.T,Comsys Holdings Corp.,,JP,Nikkei 225
+1801.T,Taisei Corp.,,JP,Nikkei 225
+1802.T,Obayashi Corp.,,JP,Nikkei 225
+1803.T,Shimizu Corp.,,JP,Nikkei 225
+1808.T,Haseko Corp.,,JP,Nikkei 225
+1812.T,Kajima Corp.,,JP,Nikkei 225
+1925.T,"Daiwa House Industry Co., Ltd.",,JP,Nikkei 225
+1928.T,"Sekisui House, Ltd.",,JP,Nikkei 225
+1963.T,JGC Corporation,,JP,Nikkei 225
+2002.T,Nisshin Seifun Group Inc.,,JP,Nikkei 225
+2269.T,"Meiji Holdings Company, Limited",,JP,Nikkei 225
+2282.T,NH Foods Ltd.,,JP,Nikkei 225
+2413.T,M3 Inc.,,JP,Nikkei 225
+2432.T,"Dena Co., Ltd.",,JP,Nikkei 225
+2501.T,Sapporo Holdings Ltd.,,JP,Nikkei 225
+2502.T,"Asahi Group Holdings, Ltd.",,JP,Nikkei 225
+2503.T,"Kirin Holdings Co, Ltd",,JP,Nikkei 225
+2768.T,Sojitz Corp.,,JP,Nikkei 225
+2801.T,Kikkoman Corp.,,JP,Nikkei 225
+2802.T,"Ajinomoto Co., Inc.",,JP,Nikkei 225
+285A.T,Kioxia Holdings Corp.,,JP,Nikkei 225
+2871.T,Nichirei Corp.,,JP,Nikkei 225
+2914.T,Japan Tobacco Inc.,,JP,Nikkei 225
+3086.T,"J. Front Retailing Co., Ltd.",,JP,Nikkei 225
+3092.T,"ZOZO Co., Ltd",,JP,Nikkei 225
+3099.T,Isetan Mitsukoshi Holdings Ltd.,,JP,Nikkei 225
+3289.T,Tokyu Land Corp.,,JP,Nikkei 225
+3382.T,"Seven & I Holdings Co., Ltd.",,JP,Nikkei 225
+3401.T,Teijin Ltd.,,JP,Nikkei 225
+3402.T,"Toray Industries, Inc.",,JP,Nikkei 225
+3405.T,"Kuraray Co., Ltd.",,JP,Nikkei 225
+3407.T,Asahi Kasei Corp.,,JP,Nikkei 225
+3436.T,SUMCO Corp.,,JP,Nikkei 225
+3659.T,"Nexon Co., Ltd.",,JP,Nikkei 225
+3697.T,SHIFT Inc.,,JP,Nikkei 225
+3861.T,Oji Holdings Corporation,,JP,Nikkei 225
+4004.T,Resonac Corp.,,JP,Nikkei 225
+4005.T,"Sumitomo Chemical Co., Ltd.",,JP,Nikkei 225
+4021.T,"Nissan Chemical Industries, Ltd.",,JP,Nikkei 225
+4042.T,Tosoh Corp.,,JP,Nikkei 225
+4043.T,Tokuyama Corporation,,JP,Nikkei 225
+4061.T,"Denka Co., Ltd.",,JP,Nikkei 225
+4063.T,"Shin-Etsu Chemical Co., Ltd.",,JP,Nikkei 225
+4151.T,"Kyowa Hakko Kirin Co., Ltd.",,JP,Nikkei 225
+4183.T,"Mitsui Chemicals, Inc.",,JP,Nikkei 225
+4188.T,Mitsubishi Chemical Holdings Corp.,,JP,Nikkei 225
+4208.T,"Ube Industries, Ltd.",,JP,Nikkei 225
+4307.T,Nomura Research Institute Ltd.,,JP,Nikkei 225
+4324.T,Dentsu Inc.,,JP,Nikkei 225
+4385.T,Mercari Inc.,,JP,Nikkei 225
+4452.T,Kao Corp.,,JP,Nikkei 225
+4502.T,Takeda Pharmaceutical Company Limited,,JP,Nikkei 225
+4503.T,Astellas Pharma Inc.,,JP,Nikkei 225
+4506.T,"Sumitomo Dainippon Pharma Co., Ltd.",,JP,Nikkei 225
+4507.T,"Shionogi & Co., Ltd.",,JP,Nikkei 225
+4519.T,"Chugai Pharmaceutical Co., Ltd.",,JP,Nikkei 225
+4523.T,"Eisai Co., Ltd.",,JP,Nikkei 225
+4543.T,Terumo Corp.,,JP,Nikkei 225
+4568.T,"Daiichi Sankyo Company, Limited",,JP,Nikkei 225
+4578.T,"Otsuka Holdings Co., Ltd.",,JP,Nikkei 225
+4661.T,"Oriental Land Co., Ltd.",,JP,Nikkei 225
+4689.T,LY Corporation,,JP,Nikkei 225
+4704.T,Trend Micro Inc.,,JP,Nikkei 225
+4751.T,CyberAgent Inc.,,JP,Nikkei 225
+4755.T,Rakuten Inc.,,JP,Nikkei 225
+4901.T,Fujifilm Holdings Corp.,,JP,Nikkei 225
+4902.T,"Konica Minolta Holdings, Inc.",,JP,Nikkei 225
+4911.T,"Shiseido Co., Ltd.",,JP,Nikkei 225
+5019.T,"Idemitsu Kosan Co., Ltd",,JP,Nikkei 225
+5020.T,Eneos Holdings,,JP,Nikkei 225
+5101.T,"The Yokohama Rubber Co., Ltd.",,JP,Nikkei 225
+5108.T,Bridgestone Corp.,,JP,Nikkei 225
+5201.T,AGC Inc.,,JP,Nikkei 225
+5214.T,"Nippon Electric Glass Co., Ltd.",,JP,Nikkei 225
+5233.T,Taiheiyo Cement Corp.,,JP,Nikkei 225
+5301.T,"Tokai Carbon Co., Ltd.",,JP,Nikkei 225
+5332.T,Toto Ltd.,,JP,Nikkei 225
+5333.T,"NGK Insulators, Ltd.",,JP,Nikkei 225
+5401.T,Nippon Steel Corp.,,JP,Nikkei 225
+5406.T,"Kobe Steel, Ltd.",,JP,Nikkei 225
+5411.T,"JFE Holdings, Inc.",,JP,Nikkei 225
+543A.T,Archion Corp.,,JP,Nikkei 225
+5631.T,"The Japan Steel Works, Ltd.",,JP,Nikkei 225
+5706.T,"Mitsui Mining & Smelting Co., Ltd.",,JP,Nikkei 225
+5711.T,Mitsubishi Materials Corp.,,JP,Nikkei 225
+5713.T,"Sumitomo Metal Mining Co., Ltd.",,JP,Nikkei 225
+5714.T,"Dowa Holdings Co., Ltd.",,JP,Nikkei 225
+5801.T,"The Furukawa Electric Co., Ltd.",,JP,Nikkei 225
+5802.T,"Sumitomo Electric Industries, Ltd.",,JP,Nikkei 225
+5803.T,Fujikura Ltd.,,JP,Nikkei 225
+5831.T,Shizuoka Financial Group,,JP,Nikkei 225
+6098.T,"Recruit Holdings Co., Ltd.",,JP,Nikkei 225
+6103.T,"Okuma Holdings, Inc.",,JP,Nikkei 225
+6113.T,Amada Co. Ltd.,,JP,Nikkei 225
+6146.T,Disco Corporation Ltd.,,JP,Nikkei 225
+6178.T,"Japan Post Holdings Co., Ltd.",,JP,Nikkei 225
+6273.T,SMC Corporation,,JP,Nikkei 225
+6301.T,Komatsu Ltd.,,JP,Nikkei 225
+6302.T,"Sumitomo Heavy Industries, Ltd.",,JP,Nikkei 225
+6305.T,"Hitachi Construction Machinery Co., Ltd.",,JP,Nikkei 225
+6326.T,Kubota Corp.,,JP,Nikkei 225
+6361.T,Ebara Corp.,,JP,Nikkei 225
+6367.T,"Daikin Industries, Ltd.",,JP,Nikkei 225
+6471.T,NSK Ltd.,,JP,Nikkei 225
+6472.T,NTN Corp.,,JP,Nikkei 225
+6473.T,JTEKT Corp.,,JP,Nikkei 225
+6479.T,"MinebeaMitsumi, Inc.",,JP,Nikkei 225
+6501.T,"Hitachi, Ltd.",,JP,Nikkei 225
+6503.T,Mitsubishi Electric Corp.,,JP,Nikkei 225
+6504.T,"Fuji Electric Co., Ltd.",,JP,Nikkei 225
+6506.T,"Yaskawa Electric Corporation, Limited",,JP,Nikkei 225
+6526.T,Socionext Inc.,,JP,Nikkei 225
+6532.T,Baycurrent Inc.,,JP,Nikkei 225
+6594.T,Nidec,,JP,Nikkei 225
+6645.T,Omron Corp.,,JP,Nikkei 225
+6701.T,NEC Corp.,,JP,Nikkei 225
+6702.T,Fujitsu Ltd.,,JP,Nikkei 225
+6723.T,Renesas Electronics(TYO: 6723),,JP,Nikkei 225
+6724.T,Seiko Epson Corp.,,JP,Nikkei 225
+6752.T,Panasonic Corp.,,JP,Nikkei 225
+6753.T,Sharp Corporation,,JP,Nikkei 225
+6758.T,Sony Corp.,,JP,Nikkei 225
+6762.T,TDK Corp.,,JP,Nikkei 225
+6770.T,"Alps Alpine Co., Ltd.",,JP,Nikkei 225
+6841.T,Yokogawa Electric Corp.,,JP,Nikkei 225
+6857.T,", the divisor is 29.66435840. That is, every ¥100 change in the adjusted price of a constituent stock results in a 3.3710 unit movement in the index.
+
+As of 29 October 2026[update], the company with the largest influence on the index is Advantest",,JP,Nikkei 225
+6861.T,Keyence Corp.,,JP,Nikkei 225
+6902.T,Denso Corp.,,JP,Nikkei 225
+6920.T,Lasertec,,JP,Nikkei 225
+6954.T,FANUC Corp.,,JP,Nikkei 225
+6963.T,"Rohm Co., Ltd.",,JP,Nikkei 225
+6971.T,Kyocera Corp.,,JP,Nikkei 225
+6976.T,"Taiyo Yuden Co., Ltd.",,JP,Nikkei 225
+6981.T,"Murata Manufacturing Co., Ltd.",,JP,Nikkei 225
+6988.T,Nitto Denko,,JP,Nikkei 225
+7004.T,Kanadevia Corp.,,JP,Nikkei 225
+7011.T,"Mitsubishi Heavy Industries, Ltd.",,JP,Nikkei 225
+7012.T,"Kawasaki Heavy Industries, Ltd.",,JP,Nikkei 225
+7013.T,IHI Corp.,,JP,Nikkei 225
+7186.T,Yokohama Financial Group,,JP,Nikkei 225
+7201.T,"Nissan Motor Co., Ltd.",,JP,Nikkei 225
+7202.T,Isuzu Motors Ltd.,,JP,Nikkei 225
+7203.T,Toyota Motor Corp.,,JP,Nikkei 225
+7211.T,Mitsubishi Motors Corp.,,JP,Nikkei 225
+7261.T,Mazda Motor Corp.,,JP,Nikkei 225
+7267.T,"Honda Motor Co., Ltd.",,JP,Nikkei 225
+7269.T,Suzuki Motor Corp.,,JP,Nikkei 225
+7270.T,Subaru Corp.,,JP,Nikkei 225
+7272.T,"Yamaha Motor Company, Ltd.",,JP,Nikkei 225
+7453.T,"Muji Co., Ltd",,JP,Nikkei 225
+7532.T,Pan Pacific International Holdings Corp.,,JP,Nikkei 225
+7731.T,Nikon Corp.,,JP,Nikkei 225
+7733.T,Olympus Corp.,,JP,Nikkei 225
+7735.T,SCREEN Holdings,,JP,Nikkei 225
+7741.T,Hoya Corporation,,JP,Nikkei 225
+7751.T,Canon Inc.,,JP,Nikkei 225
+7752.T,"Ricoh Co., Ltd.",,JP,Nikkei 225
+7832.T,"Bandai Namco Holdings, Inc.",,JP,Nikkei 225
+7911.T,"Toppan Printing Co., Ltd.",,JP,Nikkei 225
+7912.T,"Dai Nippon Printing Co., Ltd.",,JP,Nikkei 225
+7951.T,Yamaha Corporation,,JP,Nikkei 225
+7974.T,"Nintendo Co., Ltd.",,JP,Nikkei 225
+8001.T,Itochu Corp.,,JP,Nikkei 225
+8002.T,Marubeni Corp.,,JP,Nikkei 225
+8015.T,Toyota Tsusho Corp.,,JP,Nikkei 225
+8031.T,"Mitsui & Co., Ltd.",,JP,Nikkei 225
+8035.T,Tokyo Electron Ltd.,,JP,Nikkei 225
+8053.T,Sumitomo Corp.,,JP,Nikkei 225
+8058.T,Mitsubishi Corp.,,JP,Nikkei 225
+8233.T,"Takashimaya Co., Ltd.",,JP,Nikkei 225
+8252.T,"Marui Group Co., Ltd.",,JP,Nikkei 225
+8253.T,"Credit Saison Co., Ltd.",,JP,Nikkei 225
+8267.T,"Aeon Co., Ltd.",,JP,Nikkei 225
+8304.T,"Aozora Bank, Ltd.",,JP,Nikkei 225
+8306.T,"Mitsubishi UFJ Financial Group, Inc.",,JP,Nikkei 225
+8308.T,"Resona Holdings, Inc.",,JP,Nikkei 225
+8309.T,"Sumitomo Mitsui Trust Holdings, Inc.",,JP,Nikkei 225
+8316.T,"Sumitomo Mitsui Financial Group, Inc.",,JP,Nikkei 225
+8331.T,"The Chiba Bank, Ltd.",,JP,Nikkei 225
+8354.T,"Fukuoka Financial Group, Inc.",,JP,Nikkei 225
+8411.T,"Mizuho Financial Group, Inc.",,JP,Nikkei 225
+8591.T,Orix Co.,,JP,Nikkei 225
+8601.T,Daiwa Securities Group Inc.,,JP,Nikkei 225
+8604.T,"Nomura Holdings, Inc.",,JP,Nikkei 225
+8630.T,"Sompo Holdings, Inc.",,JP,Nikkei 225
+8697.T,Japan Exchange Group Inc.,,JP,Nikkei 225
+8725.T,"MS&AD Insurance Group, Inc.",,JP,Nikkei 225
+8750.T,"Dai-ichi Life Insurance Company, Limited",,JP,Nikkei 225
+8766.T,"Tokio Marine Holdings, Inc.",,JP,Nikkei 225
+8795.T,"T&D Holdings, Inc.",,JP,Nikkei 225
+8801.T,"Mitsui Fudosan Co., Ltd",,JP,Nikkei 225
+8802.T,"Mitsubishi Estate Co., Ltd.",,JP,Nikkei 225
+8804.T,"Tokyo Tatemono Co., Ltd.",,JP,Nikkei 225
+8830.T,"Sumitomo Realty & Development Co., Ltd.",,JP,Nikkei 225
+9001.T,"Tobu Railway Co., Ltd.",,JP,Nikkei 225
+9005.T,Tokyu Corp.,,JP,Nikkei 225
+9007.T,"Odakyu Electric Railway Co., Ltd.",,JP,Nikkei 225
+9008.T,Keio Corp.,,JP,Nikkei 225
+9009.T,"Keisei Electric Railway Co., Ltd.",,JP,Nikkei 225
+9020.T,East Japan Railway Company,,JP,Nikkei 225
+9021.T,West Japan Railway Company,,JP,Nikkei 225
+9022.T,Central Japan Railway Company,,JP,Nikkei 225
+9064.T,"Yamato Holdings Co., Ltd.",,JP,Nikkei 225
+9101.T,Nippon Yusen K.K.,,JP,Nikkei 225
+9104.T,"Mitsui O.S.K. Lines, Ltd.",,JP,Nikkei 225
+9107.T,"Kawasaki Kisen Kaisha, Ltd.",,JP,Nikkei 225
+9147.T,Nippon Express Holdings Inc.,,JP,Nikkei 225
+9201.T,"Japan Airlines Co., Ltd.",,JP,Nikkei 225
+9202.T,[clarification needed] Constituents must be highly traded,,JP,Nikkei 225
+9432.T,Nippon Telegraph & Telephone Corp.,,JP,Nikkei 225
+9433.T,KDDI Corp.,,JP,Nikkei 225
+9434.T,SoftBank Corp.,,JP,Nikkei 225
+9501.T,"Tokyo Electric Power Company Holdings, Incorporated",,JP,Nikkei 225
+9502.T,"Chubu Electric Power Co., Inc.",,JP,Nikkei 225
+9503.T,"The Kansai Electric Power Co., Inc.",,JP,Nikkei 225
+9531.T,"Tokyo Gas Co., Ltd.",,JP,Nikkei 225
+9532.T,"Osaka Gas Co., Ltd.",,JP,Nikkei 225
+9602.T,"Toho Co., Ltd.",,JP,Nikkei 225
+9735.T,"Secom Co., Ltd.",,JP,Nikkei 225
+9766.T,Konami Corp.,,JP,Nikkei 225
+9843.T,"Nitori Holdings Co., Ltd.",,JP,Nikkei 225
+9983.T,"Fast Retailing Co., Ltd.",,JP,Nikkei 225
+9984.T,SoftBank Group Corp.,,JP,Nikkei 225
+A,Agilent Technologies,Health Care,US,S&P 500
+AAPL,Apple Inc.,Information Technology,US,Nasdaq 100 / S&P 500
+ABBV,AbbVie,Health Care,US,S&P 500
+ABNB,Airbnb,Consumer Discretionary,US,Nasdaq 100 / S&P 500
+ABT,Abbott Laboratories,Health Care,US,S&P 500
+ACGL,Arch Capital Group,Financials,US,S&P 500
+ACN,Accenture,Information Technology,US,S&P 500
+ACS.MC,ACS,Construction,ES,IBEX 35
+ACX.MC,Acerinox,Steel,ES,IBEX 35
+ADBE,Adobe Inc.,Information Technology,US,Nasdaq 100 / S&P 500
+ADI,Analog Devices,Information Technology,US,Nasdaq 100 / S&P 500
+ADM,Archer Daniels Midland,Consumer Staples,US,S&P 500
+ADP,Automatic Data Processing,Industrials,US,Nasdaq 100 / S&P 500
+ADSK,Autodesk,Information Technology,US,Nasdaq 100 / S&P 500
+AEE,Ameren,Utilities,US,S&P 500
+AENA.MC,AENA,Aviation,ES,IBEX 35
+AEP,American Electric Power,Utilities,US,Nasdaq 100 / S&P 500
+AES,AES Corporation,Utilities,US,S&P 500
+AFL,Aflac,Financials,US,S&P 500
+AIG,American International Group,Financials,US,S&P 500
+AIZ,Assurant,Financials,US,S&P 500
+AJG,Arthur J. Gallagher & Co.,Financials,US,S&P 500
+AKAM,Akamai Technologies,Information Technology,US,S&P 500
+ALAB,Astera Labs,Technology,US,Nasdaq 100
+ALB,Albemarle Corporation,Materials,US,S&P 500
+ALGN,Align Technology,Health Care,US,S&P 500
+ALL,Allstate,Financials,US,S&P 500
+ALLE,Allegion,Industrials,US,S&P 500
+ALNY,Alnylam Pharmaceuticals,Health Care,US,Nasdaq 100
+AMAT,Applied Materials,Information Technology,US,Nasdaq 100 / S&P 500
+AMCR,Amcor,Materials,US,S&P 500
+AMD,Advanced Micro Devices,Information Technology,US,Nasdaq 100 / S&P 500
+AME,Ametek,Industrials,US,S&P 500
+AMGN,Amgen,Health Care,US,Nasdaq 100 / S&P 500
+AMP,Ameriprise Financial,Financials,US,S&P 500
+AMS.MC,Amadeus IT Group,Tourism,ES,IBEX 35
+AMT,American Tower,Real Estate,US,S&P 500
+AMZN,Amazon,Consumer Discretionary,US,Nasdaq 100 / S&P 500
+ANA.MC,Acciona,Construction,ES,IBEX 35
+ANE.MC,Acciona Energía,Energy,ES,IBEX 35
+ANET,Arista Networks,Information Technology,US,S&P 500
+AON,Aon plc,Financials,US,S&P 500
+AOS,A. O. Smith,Industrials,US,S&P 500
+APA,APA Corporation,Energy,US,S&P 500
+APD,Air Products,Materials,US,S&P 500
+APH,Amphenol,Information Technology,US,S&P 500
+APO,Apollo Global Management,Financials,US,S&P 500
+APP,AppLovin,Communication Services,US,Nasdaq 100 / S&P 500
+APTV,Aptiv,Consumer Discretionary,US,S&P 500
+ARE,Alexandria Real Estate Equities,Real Estate,US,S&P 500
+ARES,Ares Management,Financials,US,S&P 500
+ARM,Arm Holdings,Technology,US,Nasdaq 100
+ASML,ASML Holding,Technology,US,Nasdaq 100
+ATO,Atmos Energy,Utilities,US,S&P 500
+AVGO,Broadcom,Information Technology,US,Nasdaq 100 / S&P 500
+AVY,Avery Dennison,Materials,US,S&P 500
+AWK,American Water Works,Utilities,US,S&P 500
+AXON,Axon Enterprise,Industrials,US,Nasdaq 100 / S&P 500
+AXP,American Express,Financials,US,S&P 500
+AZO,AutoZone,Consumer Discretionary,US,S&P 500
+BA,Boeing,Industrials,US,S&P 500
+BAC,Bank of America,Financials,US,S&P 500
+BALL,Ball Corporation,Materials,US,S&P 500
+BAX,Baxter International,Health Care,US,S&P 500
+BBVA.MC,BBVA,Financial Services,ES,IBEX 35
+BBY,Best Buy,Consumer Discretionary,US,S&P 500
+BDX,Becton Dickinson,Health Care,US,S&P 500
+BE,Bloom Energy,Industrials,US,S&P 500
+BEN,Franklin Resources,Financials,US,S&P 500
+BF-B,Brown–Forman,Consumer Staples,US,S&P 500
+BG,Bunge Global,Consumer Staples,US,S&P 500
+BIIB,Biogen,Health Care,US,S&P 500
+BKNG,Booking Holdings,Consumer Discretionary,US,Nasdaq 100 / S&P 500
+BKR,Baker Hughes,Energy,US,Nasdaq 100 / S&P 500
+BKT.MC,Bankinter,Financial Services,ES,IBEX 35
+BLK,BlackRock,Financials,US,S&P 500
+BMY,Bristol Myers Squibb,Health Care,US,S&P 500
+BNY,BNY Mellon,Financials,US,S&P 500
+BR,Broadridge Financial Solutions,Industrials,US,S&P 500
+BRK-B,Berkshire Hathaway,Financials,US,S&P 500
+BRO,Brown & Brown,Financials,US,S&P 500
+BSX,Boston Scientific,Health Care,US,S&P 500
+BX,Blackstone Inc.,Financials,US,S&P 500
+BXP,"BXP, Inc.",Real Estate,US,S&P 500
+C,Citigroup,Financials,US,S&P 500
+CABK.MC,CaixaBank,Financial Services,ES,IBEX 35
+CAH,Cardinal Health,Health Care,US,S&P 500
+CARR,Carrier Global,Industrials,US,S&P 500
+CASY,Casey's,Consumer Staples,US,S&P 500
+CAT,Caterpillar Inc.,Industrials,US,S&P 500
+CB,Chubb Limited,Financials,US,S&P 500
+CBOE,Cboe Global Markets,Financials,US,S&P 500
+CBRE,CBRE Group,Real Estate,US,S&P 500
+CCEP,Coca-Cola Europacific Partners,Consumer Staples,US,Nasdaq 100
+CCI,Crown Castle,Real Estate,US,S&P 500
+CCL,Carnival Corporation,Consumer Discretionary,US,S&P 500
+CDNS,Cadence Design Systems,Information Technology,US,Nasdaq 100 / S&P 500
+CDW,CDW Corporation,Information Technology,US,S&P 500
+CEG,Constellation Energy,Utilities,US,Nasdaq 100 / S&P 500
+CF,CF Industries,Materials,US,S&P 500
+CFG,Citizens Financial Group,Financials,US,S&P 500
+CHD,Church & Dwight,Consumer Staples,US,S&P 500
+CHRW,C.H. Robinson,Industrials,US,S&P 500
+CHTR,Charter Communications,Communication Services,US,S&P 500
+CI,Cigna,Health Care,US,S&P 500
+CIEN,Ciena,Information Technology,US,S&P 500
+CINF,Cincinnati Financial,Financials,US,S&P 500
+CL,Colgate-Palmolive,Consumer Staples,US,S&P 500
+CLNX.MC,Cellnex Telecom,Telecommunications,ES,IBEX 35
+CLX,Clorox,Consumer Staples,US,S&P 500
+CMCSA,Comcast,Communication Services,US,Nasdaq 100 / S&P 500
+CME,CME Group,Financials,US,S&P 500
+CMG,Chipotle Mexican Grill,Consumer Discretionary,US,S&P 500
+CMI,Cummins,Industrials,US,S&P 500
+CMS,CMS Energy,Utilities,US,S&P 500
+CNC,Centene Corporation,Health Care,US,S&P 500
+CNP,CenterPoint Energy,Utilities,US,S&P 500
+COF,Capital One,Financials,US,S&P 500
+COHR,Coherent Corp.,Information Technology,US,S&P 500
+COIN,Coinbase,Financials,US,S&P 500
+COL.MC,Inmobiliaria Colonial,Real Estate,ES,IBEX 35
+COO,Cooper Companies (The),Health Care,US,S&P 500
+COP,ConocoPhillips,Energy,US,S&P 500
+COR,Cencora,Health Care,US,S&P 500
+COST,Costco,Consumer Staples,US,Nasdaq 100 / S&P 500
+CPAY,Corpay,Financials,US,S&P 500
+CPRT,Copart,Industrials,US,Nasdaq 100 / S&P 500
+CPT,Camden Property Trust,Real Estate,US,S&P 500
+CRH,CRH plc,Materials,US,S&P 500
+CRL,Charles River Laboratories,Health Care,US,S&P 500
+CRM,Salesforce,Information Technology,US,S&P 500
+CRWD,CrowdStrike,Information Technology,US,Nasdaq 100 / S&P 500
+CRWV,CoreWeave,Technology,US,Nasdaq 100
+CSCO,Cisco,Information Technology,US,Nasdaq 100 / S&P 500
+CSGP,CoStar Group,Real Estate,US,S&P 500
+CSX,CSX Corporation,Industrials,US,Nasdaq 100 / S&P 500
+CTAS,Cintas,Industrials,US,Nasdaq 100 / S&P 500
+CTSH,Cognizant,Information Technology,US,S&P 500
+CVNA,Carvana,Consumer Discretionary,US,S&P 500
+CVS,CVS Health,Health Care,US,S&P 500
+CVX,Chevron Corporation,Energy,US,S&P 500
+D,Dominion Energy,Utilities,US,S&P 500
+DAL,Delta Air Lines,Industrials,US,S&P 500
+DASH,DoorDash,Consumer Discretionary,US,Nasdaq 100 / S&P 500
+DD,DuPont,Industrials,US,S&P 500
+DDOG,Datadog,Information Technology,US,Nasdaq 100 / S&P 500
+DE,Deere & Company,Industrials,US,S&P 500
+DECK,Deckers Brands,Consumer Discretionary,US,S&P 500
+DELL,Dell Technologies,Information Technology,US,S&P 500
+DG,Dollar General,Consumer Staples,US,S&P 500
+DGX,Quest Diagnostics,Health Care,US,S&P 500
+DHI,D. R. Horton,Consumer Discretionary,US,S&P 500
+DHR,Danaher Corporation,Health Care,US,S&P 500
+DIS,Walt Disney Company (The),Communication Services,US,S&P 500
+DLR,Digital Realty,Real Estate,US,S&P 500
+DLTR,Dollar Tree,Consumer Staples,US,S&P 500
+DOC,Healthpeak Properties,Real Estate,US,S&P 500
+DOV,Dover Corporation,Industrials,US,S&P 500
+DOW,Dow Inc.,Materials,US,S&P 500
+DPZ,Domino's,Consumer Discretionary,US,S&P 500
+DRI,Darden Restaurants,Consumer Discretionary,US,S&P 500
+DTE,DTE Energy,Utilities,US,S&P 500
+DUK,Duke Energy,Utilities,US,S&P 500
+DVA,DaVita,Health Care,US,S&P 500
+DVN,Devon Energy,Energy,US,S&P 500
+DXCM,Dexcom,Health Care,US,Nasdaq 100 / S&P 500
+EBAY,eBay Inc.,Consumer Discretionary,US,S&P 500
+ECHO,EchoStar,Communication Services,US,S&P 500
+ECL,Ecolab,Materials,US,S&P 500
+ED,Consolidated Edison,Utilities,US,S&P 500
+EFX,Equifax,Industrials,US,S&P 500
+EG,Everest Group,Financials,US,S&P 500
+EIX,Edison International,Utilities,US,S&P 500
+EL,Estée Lauder Companies (The),Consumer Staples,US,S&P 500
+ELE.MC,Endesa,Energy,ES,IBEX 35
+ELV,Elevance Health,Health Care,US,S&P 500
+EME,Emcor,Industrials,US,S&P 500
+EMR,Emerson Electric,Industrials,US,S&P 500
+ENG.MC,Enagás,Energy,ES,IBEX 35
+EOG,EOG Resources,Energy,US,S&P 500
+EQIX,Equinix,Real Estate,US,S&P 500
+EQT,EQT Corporation,Energy,US,S&P 500
+ERIE,Erie Indemnity,Financials,US,S&P 500
+ES,Eversource Energy,Utilities,US,S&P 500
+ESS,Essex Property Trust,Real Estate,US,S&P 500
+ETN,Eaton Corporation,Industrials,US,S&P 500
+ETR,Entergy,Utilities,US,S&P 500
+EVRG,Evergy,Utilities,US,S&P 500
+EW,Edwards Lifesciences,Health Care,US,S&P 500
+EXC,Exelon,Utilities,US,Nasdaq 100 / S&P 500
+EXE,Expand Energy,Energy,US,S&P 500
+EXPD,Expeditors International,Industrials,US,S&P 500
+EXPE,Expedia Group,Consumer Discretionary,US,S&P 500
+EXR,Extra Space Storage,Real Estate,US,S&P 500
+F,Ford Motor Company,Consumer Discretionary,US,S&P 500
+FANG,Diamondback Energy,Energy,US,Nasdaq 100 / S&P 500
+FAST,Fastenal,Industrials,US,Nasdaq 100 / S&P 500
+FCX,Freeport-McMoRan,Materials,US,S&P 500
+FDR.MC,Fluidra,Manufacturing,ES,IBEX 35
+FDS,FactSet,Financials,US,S&P 500
+FDX,FedEx,Industrials,US,S&P 500
+FDXF,FedEx Freight,Industrials,US,S&P 500
+FE,FirstEnergy,Utilities,US,S&P 500
+FER,Ferrovial,Industrials,US,Nasdaq 100
+FER.MC,Ferrovial,Infrastructure,ES,IBEX 35
+FERG,Ferguson Enterprises,Industrials,US,S&P 500
+FFIV,"F5, Inc.",Information Technology,US,S&P 500
+FICO,Fair Isaac,Information Technology,US,S&P 500
+FIS,Fidelity National Information Services,Financials,US,S&P 500
+FISV,Fiserv,Financials,US,S&P 500
+FITB,Fifth Third Bancorp,Financials,US,S&P 500
+FIX,Comfort Systems USA,Industrials,US,S&P 500
+FLEX,Flex Ltd.,Information Technology,US,S&P 500
+FOX,Fox Corporation (Class B),Communication Services,US,S&P 500
+FOXA,Fox Corporation (Class A),Communication Services,US,S&P 500
+FRT,Federal Realty Investment Trust,Real Estate,US,S&P 500
+FSLR,First Solar,Information Technology,US,S&P 500
+FTNT,Fortinet,Information Technology,US,Nasdaq 100 / S&P 500
+FTV,Fortive,Industrials,US,S&P 500
+GD,General Dynamics,Industrials,US,S&P 500
+GDDY,GoDaddy,Information Technology,US,S&P 500
+GE,GE Aerospace,Industrials,US,S&P 500
+GEHC,GE HealthCare,Health Care,US,Nasdaq 100 / S&P 500
+GEN,Gen Digital,Information Technology,US,S&P 500
+GEV,GE Vernova,Industrials,US,S&P 500
+GILD,Gilead Sciences,Health Care,US,Nasdaq 100 / S&P 500
+GIS,General Mills,Consumer Staples,US,S&P 500
+GL,Globe Life,Financials,US,S&P 500
+GLW,Corning Inc.,Information Technology,US,S&P 500
+GM,General Motors,Consumer Discretionary,US,S&P 500
+GNRC,Generac,Industrials,US,S&P 500
+GOOG,Alphabet Inc. (Class C),Communication Services,US,Nasdaq 100 / S&P 500
+GOOGL,Alphabet Inc. (Class A),Communication Services,US,Nasdaq 100 / S&P 500
+GPC,Genuine Parts Company,Consumer Discretionary,US,S&P 500
+GPN,Global Payments,Financials,US,S&P 500
+GRF.MC,Grifols,Pharmaceuticals,ES,IBEX 35
+GRMN,Garmin,Consumer Discretionary,US,S&P 500
+GS,Goldman Sachs,Financials,US,S&P 500
+GWW,W. W. Grainger,Industrials,US,S&P 500
+HAL,Halliburton,Energy,US,S&P 500
+HAS,Hasbro,Consumer Discretionary,US,S&P 500
+HBAN,Huntington Bancshares,Financials,US,S&P 500
+HCA,HCA Healthcare,Health Care,US,S&P 500
+HD,Home Depot (The),Consumer Discretionary,US,S&P 500
+HIG,Hartford (The),Financials,US,S&P 500
+HII,Huntington Ingalls Industries,Industrials,US,S&P 500
+HLT,Hilton Worldwide,Consumer Discretionary,US,S&P 500
+HON,Honeywell Technologies,Industrials,US,Nasdaq 100 / S&P 500
+HONA,Honeywell Aerospace,Industrials,US,Nasdaq 100 / S&P 500
+HOOD,Robinhood Markets,Financials,US,S&P 500
+HPE,Hewlett Packard Enterprise,Information Technology,US,S&P 500
+HPQ,HP Inc.,Information Technology,US,S&P 500
+HRL,Hormel Foods,Consumer Staples,US,S&P 500
+HSIC,Henry Schein,Health Care,US,S&P 500
+HST,Host Hotels & Resorts,Real Estate,US,S&P 500
+HSY,Hershey Company (The),Consumer Staples,US,S&P 500
+HUBB,Hubbell Incorporated,Industrials,US,S&P 500
+HUM,Humana,Health Care,US,S&P 500
+HWM,Howmet Aerospace,Industrials,US,S&P 500
+IAG.MC,International Airlines Group,Aviation,ES,IBEX 35
+IBE.MC,Iberdrola,Energy,ES,IBEX 35
+IBKR,Interactive Brokers,Financials,US,S&P 500
+IBM,IBM,Information Technology,US,S&P 500
+ICE,Intercontinental Exchange,Financials,US,S&P 500
+IDR.MC,Indra,Information Technology,ES,IBEX 35
+IDXX,Idexx Laboratories,Health Care,US,Nasdaq 100 / S&P 500
+IEX,IDEX Corporation,Industrials,US,S&P 500
+IFF,International Flavors & Fragrances,Materials,US,S&P 500
+ILMN,"Illumina, Inc.",Health Care,US,S&P 500
+INCY,Incyte,Health Care,US,S&P 500
+INTC,Intel,Information Technology,US,Nasdaq 100 / S&P 500
+INTU,Intuit,Information Technology,US,Nasdaq 100 / S&P 500
+INVH,Invitation Homes,Real Estate,US,S&P 500
+IP,International Paper,Materials,US,S&P 500
+IQV,IQVIA,Health Care,US,S&P 500
+IR,Ingersoll Rand,Industrials,US,S&P 500
+IRM,Iron Mountain,Real Estate,US,S&P 500
+ISRG,Intuitive Surgical,Health Care,US,Nasdaq 100 / S&P 500
+IT,Gartner,Information Technology,US,S&P 500
+ITW,Illinois Tool Works,Industrials,US,S&P 500
+ITX.MC,Inditex,Textile,ES,IBEX 35
+IVZ,Invesco,Financials,US,S&P 500
+J,Jacobs Solutions,Industrials,US,S&P 500
+JBHT,J.B. Hunt,Industrials,US,S&P 500
+JBL,Jabil,Information Technology,US,S&P 500
+JCI,Johnson Controls,Industrials,US,S&P 500
+JKHY,Jack Henry & Associates,Financials,US,S&P 500
+JNJ,Johnson & Johnson,Health Care,US,S&P 500
+JPM,JPMorgan Chase,Financials,US,S&P 500
+KDP,Keurig Dr Pepper,Consumer Staples,US,Nasdaq 100 / S&P 500
+KEY,KeyCorp,Financials,US,S&P 500
+KEYS,Keysight Technologies,Information Technology,US,S&P 500
+KHC,Kraft Heinz,Consumer Staples,US,S&P 500
+KIM,Kimco Realty,Real Estate,US,S&P 500
+KKR,KKR & Co.,Financials,US,S&P 500
+KLAC,KLA Corporation,Information Technology,US,Nasdaq 100 / S&P 500
+KMB,Kimberly-Clark,Consumer Staples,US,S&P 500
+KMI,Kinder Morgan,Energy,US,S&P 500
+KO,Coca-Cola Company (The),Consumer Staples,US,S&P 500
+KR,Kroger,Consumer Staples,US,S&P 500
+L,Loews Corporation,Financials,US,S&P 500
+LDOS,Leidos,Industrials,US,S&P 500
+LEN,Lennar,Consumer Discretionary,US,S&P 500
+LH,Labcorp,Health Care,US,S&P 500
+LHX,L3Harris,Industrials,US,S&P 500
+LII,Lennox International,Industrials,US,S&P 500
+LIN,Linde plc,Materials,US,Nasdaq 100 / S&P 500
+LITE,Lumentum,Information Technology,US,Nasdaq 100 / S&P 500
+LLY,Lilly (Eli),Health Care,US,S&P 500
+LMT,Lockheed Martin,Industrials,US,S&P 500
+LNT,Alliant Energy,Utilities,US,S&P 500
+LOG.MC,Logista,Logistics,ES,IBEX 35
+LOW,Lowe's,Consumer Discretionary,US,S&P 500
+LRCX,Lam Research,Information Technology,US,Nasdaq 100 / S&P 500
+LULU,Lululemon Athletica,Consumer Discretionary,US,S&P 500
+LUV,Southwest Airlines,Industrials,US,S&P 500
+LVS,Las Vegas Sands,Consumer Discretionary,US,S&P 500
+LYB,LyondellBasell,Materials,US,S&P 500
+LYV,Live Nation Entertainment,Communication Services,US,S&P 500
+MA,Mastercard,Financials,US,S&P 500
+MAA,Mid-America Apartment Communities,Real Estate,US,S&P 500
+MAP.MC,Mapfre,Insurance,ES,IBEX 35
+MAR,Marriott International,Consumer Discretionary,US,Nasdaq 100 / S&P 500
+MAS,Masco,Industrials,US,S&P 500
+MCD,McDonald's,Consumer Discretionary,US,S&P 500
+MCHP,Microchip Technology,Information Technology,US,Nasdaq 100 / S&P 500
+MCK,McKesson,Health Care,US,S&P 500
+MCO,Moody's Corporation,Financials,US,S&P 500
+MDLZ,Mondelez International,Consumer Staples,US,Nasdaq 100 / S&P 500
+MDT,Medtronic,Health Care,US,S&P 500
+MELI,Mercado Libre,Consumer Discretionary,US,Nasdaq 100
+MET,MetLife,Financials,US,S&P 500
+META,Meta Platforms,Communication Services,US,Nasdaq 100 / S&P 500
+MGM,MGM Resorts,Consumer Discretionary,US,S&P 500
+MKC,McCormick & Company,Consumer Staples,US,S&P 500
+MLM,Martin Marietta Materials,Materials,US,S&P 500
+MMM,3M,Industrials,US,S&P 500
+MNST,Monster Beverage,Consumer Staples,US,Nasdaq 100 / S&P 500
+MO,Altria,Consumer Staples,US,S&P 500
+MOS,Mosaic Company (The),Materials,US,S&P 500
+MPC,Marathon Petroleum,Energy,US,S&P 500
+MPWR,Monolithic Power Systems,Information Technology,US,Nasdaq 100 / S&P 500
+MRK,Merck & Co.,Health Care,US,S&P 500
+MRL.MC,Merlin Properties,Real Estate,ES,IBEX 35
+MRNA,Moderna,Health Care,US,Nasdaq 100 / S&P 500
+MRSH,Marsh McLennan,Financials,US,S&P 500
+MRVL,Marvell Technology,Information Technology,US,Nasdaq 100 / S&P 500
+MS,Morgan Stanley,Financials,US,S&P 500
+MSCI,MSCI,Financials,US,S&P 500
+MSFT,Microsoft,Information Technology,US,Nasdaq 100 / S&P 500
+MSI,Motorola Solutions,Information Technology,US,S&P 500
+MSTR,MicroStrategy,Technology,US,Nasdaq 100
+MTB,M&T Bank,Financials,US,S&P 500
+MTD,Mettler Toledo,Health Care,US,S&P 500
+MTS.MC,ArcelorMittal,Steel,ES,IBEX 35
+MU,Micron Technology,Information Technology,US,Nasdaq 100 / S&P 500
+NBIS,Nebius Group,Technology,US,Nasdaq 100
+NCLH,Norwegian Cruise Line Holdings,Consumer Discretionary,US,S&P 500
+NDAQ,"Nasdaq, Inc.",Financials,US,S&P 500
+NDSN,Nordson Corporation,Industrials,US,S&P 500
+NEE,NextEra Energy,Utilities,US,S&P 500
+NEM,Newmont,Materials,US,S&P 500
+NFLX,Netflix,Communication Services,US,Nasdaq 100 / S&P 500
+NI,NiSource,Utilities,US,S&P 500
+NKE,"Nike, Inc.",Consumer Discretionary,US,S&P 500
+NOC,Northrop Grumman,Industrials,US,S&P 500
+NOW,ServiceNow,Information Technology,US,S&P 500
+NRG,NRG Energy,Utilities,US,S&P 500
+NSC,Norfolk Southern,Industrials,US,S&P 500
+NTAP,NetApp,Information Technology,US,S&P 500
+NTGY.MC,Naturgy,Energy,ES,IBEX 35
+NTRS,Northern Trust,Financials,US,S&P 500
+NUE,Nucor,Materials,US,S&P 500
+NVDA,Nvidia,Information Technology,US,Nasdaq 100 / S&P 500
+NVR,"NVR, Inc.",Consumer Discretionary,US,S&P 500
+NWS,News Corp (Class B),Communication Services,US,S&P 500
+NWSA,News Corp (Class A),Communication Services,US,S&P 500
+NXPI,NXP Semiconductors,Information Technology,US,Nasdaq 100 / S&P 500
+O,Realty Income,Real Estate,US,S&P 500
+ODFL,Old Dominion,Industrials,US,Nasdaq 100 / S&P 500
+OKE,Oneok,Energy,US,S&P 500
+OKTA,"Okta, Inc.",Information Technology,US,S&P 500
+OMC,Omnicom Group,Communication Services,US,S&P 500
+ON,ON Semiconductor,Information Technology,US,S&P 500
+ORCL,Oracle Corporation,Information Technology,US,S&P 500
+ORLY,O'Reilly Automotive,Consumer Discretionary,US,Nasdaq 100 / S&P 500
+OTIS,Otis Worldwide,Industrials,US,S&P 500
+OXY,Occidental Petroleum,Energy,US,S&P 500
+P,Everpure,Information Technology,US,S&P 500
+PANW,Palo Alto Networks,Information Technology,US,Nasdaq 100 / S&P 500
+PAYX,Paychex,Industrials,US,Nasdaq 100 / S&P 500
+PCAR,Paccar,Industrials,US,Nasdaq 100 / S&P 500
+PCG,PG&E Corporation,Utilities,US,S&P 500
+PDD,PDD Holdings,Technology,US,Nasdaq 100
+PEG,Public Service Enterprise Group,Utilities,US,S&P 500
+PEP,PepsiCo,Consumer Staples,US,Nasdaq 100 / S&P 500
+PFE,Pfizer,Health Care,US,S&P 500
+PFG,Principal Financial Group,Financials,US,S&P 500
+PG,Procter & Gamble,Consumer Staples,US,S&P 500
+PGR,Progressive Corporation,Financials,US,S&P 500
+PH,Parker Hannifin,Industrials,US,S&P 500
+PHM,PulteGroup,Consumer Discretionary,US,S&P 500
+PKG,Packaging Corporation of America,Materials,US,S&P 500
+PLD,Prologis,Real Estate,US,S&P 500
+PLTR,Palantir Technologies,Information Technology,US,Nasdaq 100 / S&P 500
+PM,Philip Morris International,Consumer Staples,US,S&P 500
+PNC,PNC Financial Services,Financials,US,S&P 500
+PNR,Pentair,Industrials,US,S&P 500
+PNW,Pinnacle West Capital,Utilities,US,S&P 500
+PODD,Insulet Corporation,Health Care,US,S&P 500
+PPG,PPG Industries,Materials,US,S&P 500
+PPL,PPL Corporation,Utilities,US,S&P 500
+PRU,Prudential Financial,Financials,US,S&P 500
+PSA,Public Storage,Real Estate,US,S&P 500
+PSX,Phillips 66,Energy,US,S&P 500
+PTC,PTC Inc.,Information Technology,US,S&P 500
+PUIG.MC,Puig,Clothes and Cosmetics,ES,IBEX 35
+PWR,Quanta Services,Industrials,US,S&P 500
+PYPL,PayPal,Financials,US,Nasdaq 100 / S&P 500
+Q,Qnity Electronics,Information Technology,US,S&P 500
+QCOM,Qualcomm,Information Technology,US,Nasdaq 100 / S&P 500
+RCL,Royal Caribbean Group,Consumer Discretionary,US,S&P 500
+RDDT,Reddit,Communication Services,US,S&P 500
+RED.MC,Redeia Corporación,Energy,ES,IBEX 35
+REG,Regency Centers,Real Estate,US,S&P 500
+REGN,Regeneron Pharmaceuticals,Health Care,US,Nasdaq 100 / S&P 500
+REP.MC,Repsol,Oil and Gas,ES,IBEX 35
+RF,Regions Financial Corporation,Financials,US,S&P 500
+RJF,Raymond James Financial,Financials,US,S&P 500
+RKLB,Rocket Lab,Industrials,US,Nasdaq 100
+RL,Ralph Lauren Corporation,Consumer Discretionary,US,S&P 500
+RMD,ResMed,Health Care,US,S&P 500
+ROK,Rockwell Automation,Industrials,US,S&P 500
+ROL,"Rollins, Inc.",Industrials,US,S&P 500
+ROP,Roper Technologies,Information Technology,US,Nasdaq 100 / S&P 500
+ROST,Ross Stores,Consumer Discretionary,US,Nasdaq 100 / S&P 500
+ROVI.MC,Laboratorios Rovi [es],Pharmaceuticals,ES,IBEX 35
+RSG,Republic Services,Industrials,US,S&P 500
+RTX,RTX Corporation,Industrials,US,S&P 500
+RVTY,Revvity,Health Care,US,S&P 500
+SAB.MC,Banco Sabadell,Financial Services,ES,IBEX 35
+SAN.MC,Santander,Financial Services,ES,IBEX 35
+SBAC,SBA Communications,Real Estate,US,S&P 500
+SBUX,Starbucks,Consumer Discretionary,US,Nasdaq 100 / S&P 500
+SCHW,Charles Schwab Corporation,Financials,US,S&P 500
+SCYR.MC,Sacyr,Construction,ES,IBEX 35
+SHOP,Shopify,Technology,US,Nasdaq 100
+SHW,Sherwin-Williams,Materials,US,S&P 500
+SJM,J.M. Smucker Company (The),Consumer Staples,US,S&P 500
+SKYD,Skydance,Communication Services,US,S&P 500
+SLB,Schlumberger,Energy,US,S&P 500
+SLR.MC,Solaria,Solar Energy,ES,IBEX 35
+SMCI,Supermicro,Information Technology,US,S&P 500
+SNA,Snap-on,Industrials,US,S&P 500
+SNDK,Sandisk,Information Technology,US,Nasdaq 100 / S&P 500
+SNPS,Synopsys,Information Technology,US,Nasdaq 100 / S&P 500
+SO,Southern Company,Utilities,US,S&P 500
+SOLV,Solventum,Health Care,US,S&P 500
+SPCX,SpaceX,Telecommunications,US,Nasdaq 100
+SPG,Simon Property Group,Real Estate,US,S&P 500
+SPGI,S&P Global,Financials,US,S&P 500
+SRE,Sempra,Utilities,US,S&P 500
+STE,Steris,Health Care,US,S&P 500
+STLD,Steel Dynamics,Materials,US,S&P 500
+STT,State Street Corporation,Financials,US,S&P 500
+STX,Seagate Technology,Information Technology,US,Nasdaq 100 / S&P 500
+STZ,Constellation Brands,Consumer Staples,US,S&P 500
+SW,Smurfit Westrock,Materials,US,S&P 500
+SWK,Stanley Black & Decker,Industrials,US,S&P 500
+SWKS,Skyworks Solutions,Information Technology,US,S&P 500
+SYF,Synchrony Financial,Financials,US,S&P 500
+SYK,Stryker Corporation,Health Care,US,S&P 500
+SYY,Sysco,Consumer Staples,US,S&P 500
+T,AT&T,Communication Services,US,S&P 500
+TDG,TransDigm Group,Industrials,US,S&P 500
+TDY,Teledyne Technologies,Information Technology,US,S&P 500
+TECH,Bio-Techne,Health Care,US,S&P 500
+TEF.MC,Telefónica,Telecommunications,ES,IBEX 35
+TEL,TE Connectivity,Information Technology,US,S&P 500
+TER,Teradyne,Information Technology,US,Nasdaq 100 / S&P 500
+TFC,Truist Financial,Financials,US,S&P 500
+TGT,Target Corporation,Consumer Staples,US,S&P 500
+TJX,TJX Companies,Consumer Discretionary,US,S&P 500
+TKO,TKO Group Holdings,Communication Services,US,S&P 500
+TMO,Thermo Fisher Scientific,Health Care,US,S&P 500
+TMUS,T-Mobile US,Communication Services,US,Nasdaq 100 / S&P 500
+TPL,Texas Pacific Land Corporation,Energy,US,S&P 500
+TPR,"Tapestry, Inc.",Consumer Discretionary,US,S&P 500
+TRGP,Targa Resources,Energy,US,S&P 500
+TRI,Thomson Reuters,Technology,US,Nasdaq 100
+TRMB,Trimble Inc.,Information Technology,US,S&P 500
+TROW,T. Rowe Price,Financials,US,S&P 500
+TRV,Travelers Companies (The),Financials,US,S&P 500
+TSCO,Tractor Supply,Consumer Discretionary,US,S&P 500
+TSLA,"Tesla, Inc.",Consumer Discretionary,US,Nasdaq 100 / S&P 500
+TSN,Tyson Foods,Consumer Staples,US,S&P 500
+TT,Trane Technologies,Industrials,US,S&P 500
+TTWO,Take-Two Interactive,Communication Services,US,Nasdaq 100 / S&P 500
+TWLO,Twilio,Information Technology,US,S&P 500
+TXN,Texas Instruments,Information Technology,US,Nasdaq 100 / S&P 500
+TXT,Textron,Industrials,US,S&P 500
+TYL,Tyler Technologies,Information Technology,US,S&P 500
+UAL,United Airlines Holdings,Industrials,US,S&P 500
+UBER,Uber,Industrials,US,S&P 500
+UDR,"UDR, Inc.",Real Estate,US,S&P 500
+UHS,Universal Health Services,Health Care,US,S&P 500
+ULTA,Ulta Beauty,Consumer Discretionary,US,S&P 500
+UNH,UnitedHealth Group,Health Care,US,S&P 500
+UNI.MC,Unicaja,Financial Services,ES,IBEX 35
+UNP,Union Pacific Corporation,Industrials,US,S&P 500
+UPS,United Parcel Service,Industrials,US,S&P 500
+URI,United Rentals,Industrials,US,S&P 500
+USB,U.S. Bancorp,Financials,US,S&P 500
+V,Visa Inc.,Financials,US,S&P 500
+VEEV,Veeva Systems,Health Care,US,S&P 500
+VICI,Vici Properties,Real Estate,US,S&P 500
+VLO,Valero Energy,Energy,US,S&P 500
+VLTO,Veralto,Industrials,US,S&P 500
+VMC,Vulcan Materials Company,Materials,US,S&P 500
+VMRK,Vivmark Residential,Real Estate,US,S&P 500
+VRSK,Verisk Analytics,Industrials,US,S&P 500
+VRSN,Verisign,Information Technology,US,S&P 500
+VRT,Vertiv,Industrials,US,S&P 500
+VRTX,Vertex Pharmaceuticals,Health Care,US,Nasdaq 100 / S&P 500
+VST,Vistra Corp.,Utilities,US,S&P 500
+VTR,Ventas,Real Estate,US,S&P 500
+VTRS,Viatris,Health Care,US,S&P 500
+VYLR,Vylor,Consumer Staples,US,S&P 500
+VZ,Verizon,Communication Services,US,S&P 500
+WAB,Wabtec,Industrials,US,S&P 500
+WAT,Waters Corporation,Health Care,US,S&P 500
+WDAY,"Workday, Inc.",Information Technology,US,Nasdaq 100 / S&P 500
+WDC,Western Digital,Information Technology,US,Nasdaq 100 / S&P 500
+WEC,WEC Energy Group,Utilities,US,S&P 500
+WELL,Welltower,Real Estate,US,S&P 500
+WFC,Wells Fargo,Financials,US,S&P 500
+WM,Waste Management,Industrials,US,S&P 500
+WMB,Williams Companies,Energy,US,S&P 500
+WMT,Walmart,Consumer Staples,US,Nasdaq 100 / S&P 500
+WRB,W. R. Berkley Corporation,Financials,US,S&P 500
+WSM,"Williams-Sonoma, Inc.",Consumer Discretionary,US,S&P 500
+WST,West Pharmaceutical Services,Health Care,US,S&P 500
+WTW,Willis Towers Watson,Financials,US,S&P 500
+WY,Weyerhaeuser,Real Estate,US,S&P 500
+WYNN,Wynn Resorts,Consumer Discretionary,US,S&P 500
+XEL,Xcel Energy,Utilities,US,Nasdaq 100 / S&P 500
+XOM,ExxonMobil,Energy,US,S&P 500
+XYL,Xylem Inc.,Industrials,US,S&P 500
+XYZ,"Block, Inc.",Financials,US,S&P 500
+YUM,Yum! Brands,Consumer Discretionary,US,S&P 500
+ZBH,Zimmer Biomet,Health Care,US,S&P 500
+ZBRA,Zebra Technologies,Information Technology,US,S&P 500
+ZTS,Zoetis,Health Care,US,S&P 500

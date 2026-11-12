@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Oportunidades">
+<meta name="theme-color" content="#0b0f14">
+<title>Oportunidades</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1 id="title">Oportunidades</h1>
+    <p id="subtitle" class="muted">Cargando informe…</p>
+  </div>
+  <button id="refresh" class="icon-btn" aria-label="Recargar">↻</button>
+</header>
+
+<main>
+  <section id="tab-hoy" class="tab active"></section>
+  <section id="tab-mercados" class="tab"></section>
+  <section id="tab-macro" class="tab"></section>
+  <section id="tab-historico" class="tab"></section>
+</main>
+
+<nav class="tabbar">
+  <button data-tab="hoy" class="active"><span>★</span>Hoy</button>
+  <button data-tab="mercados"><span>◎</span>Mercados</button>
+  <button data-tab="macro"><span>∿</span>Macro</button>
+  <button data-tab="historico"><span>☰</span>Histórico</button>
+</nav>
+
+<div id="sheet" class="sheet" hidden>
+  <div class="sheet-backdrop"></div>
+  <div class="sheet-panel" role="dialog" aria-modal="true">
+    <div class="sheet-grip"></div>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
