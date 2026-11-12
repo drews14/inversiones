@@ -149,3 +149,11 @@ ul.reasons li { margin: 4px 0; }
   color: var(--text); font-weight: 600; font-size: 15px; }
 .btn.primary { background: var(--accent); color: #fff; }
 @media (prefers-color-scheme: dark) { .btn.primary { color: #06261a; } }
+
+.tpill { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 999px; vertical-align: 2px; margin-left: 4px; white-space: nowrap; }
+.t-giro { background: var(--accent-soft); color: var(--up); }
+.t-vigilar { background: var(--warn-soft); color: var(--warn); }
+.t-esperar { background: var(--card-2); color: var(--muted); }
+.sig-pos, .sig-neg { margin-top: 10px; list-style: none; padding-left: 0; font-size: 14px; }
+.sig-pos li::before { content: "▲ "; color: var(--up); }
+.sig-neg li::before { content: "▼ "; color: var(--down); }

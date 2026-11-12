@@ -2,6 +2,12 @@
 
 const FLAG = { US: "🇺🇸", ES: "🇪🇸", JP: "🇯🇵" };
 const BLOCK_LABEL = { valuation: "Valoración", technical: "Sobreventa técnica", quality: "Calidad / fiabilidad", analysts: "Consenso analistas" };
+const TIMING = {
+  giro: { text: "Señal de giro", cls: "t-giro", help: "Hay señales de que la caída se está frenando." },
+  vigilar: { text: "Vigilar", cls: "t-vigilar", help: "Señales mixtas: buena candidata, pero aún sin confirmación clara." },
+  esperar: { text: "Esperar", cls: "t-esperar", help: "La caída todavía no muestra señales de frenar." },
+};
+const timingPill = (t) => (t && TIMING[t.label] ? `<span class="tpill ${TIMING[t.label].cls}">${TIMING[t.label].text}</span>` : "");
 const REC = { strong_buy: "Compra fuerte", buy: "Comprar", hold: "Mantener", underperform: "Infraponderar", sell: "Vender", none: "—" };
 
 let report = null;
@@ -39,7 +45,7 @@ function oppRow(o, i) {
     <div class="opp-main">
       <div class="opp-head">
         <div style="min-width:0">
-          <div class="opp-tk">${FLAG[o.market] || ""} ${esc(o.ticker)}</div>
+          <div class="opp-tk">${FLAG[o.market] || ""} ${esc(o.ticker)} ${timingPill(o.timing)}</div>
           <div class="opp-name">${esc(o.name)}</div>
         </div>
         <div class="opp-price num">${money(o.price, o.currency)}<br><span class="${cls(o.chg1d)}">${pct(o.chg1d)}</span></div>
@@ -152,6 +158,12 @@ function openDetail(o) {
       <div class="muted" style="font-size:12px">Últimas 60 sesiones</div>
     </div>
     ${(o.flags || []).length ? `<div class="card" style="background:var(--warn-soft)"><ul class="reasons" style="color:var(--warn)">${o.flags.map((f) => `<li>${esc(f)}</li>`).join("")}</ul></div>` : ""}
+    ${o.timing ? `<h2>Momento de entrada</h2>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px">${timingPill(o.timing)}<span class="muted" style="font-size:13px">${TIMING[o.timing.label].help}</span></div>
+      ${o.timing.positive.length ? `<ul class="reasons sig-pos">${o.timing.positive.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      ${o.timing.negative.length ? `<ul class="reasons sig-neg">${o.timing.negative.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    </div>` : ""}
     <h2>Por qué aparece</h2>
     <div class="card">${(o.reasons || []).length ? `<ul class="reasons">${o.reasons.map((r) => `<li>${esc(r)}</li>`).join("")}</ul>` : `<span class="muted">Puntuación equilibrada en todos los bloques.</span>`}</div>
     <h2>Desglose de la nota</h2>

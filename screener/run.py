@@ -61,16 +61,18 @@ def clean(o):
 
 # ---------------------------------------------------------------- datos
 def load_prices(tickers):
-    """Descarga 1 año de cierres diarios de todos los tickers en bloque."""
-    frames = []
+    """Descarga 1 año de cierres y volúmenes diarios de todos los tickers en bloque."""
+    closes, vols = [], []
     for i in range(0, len(tickers), 200):
         chunk = tickers[i:i + 200]
-        df = yf.download(chunk, period="1y", interval="1d", auto_adjust=True,
-                         progress=False, threads=True, group_by="column")["Close"]
-        if isinstance(df, pd.Series):
-            df = df.to_frame(chunk[0])
-        frames.append(df)
-    return pd.concat(frames, axis=1)
+        raw = yf.download(chunk, period="1y", interval="1d", auto_adjust=True,
+                          progress=False, threads=True, group_by="column")
+        c, v = raw["Close"], raw["Volume"]
+        if isinstance(c, pd.Series):
+            c, v = c.to_frame(chunk[0]), v.to_frame(chunk[0])
+        closes.append(c)
+        vols.append(v)
+    return pd.concat(closes, axis=1), pd.concat(vols, axis=1)
 
 
 def load_info(ticker):
@@ -211,6 +213,103 @@ def score(t, info, sector_pe):
         if 0 <= days <= 14:
             flags.append(f"Presenta resultados en {days} días (más volatilidad)")
     return blocks, reasons, flags, (have / total if total else 0), upside, pe, roe
+
+
+# ---------------------------------------------------------------- momento de entrada
+BENCHMARK = {"US": "^GSPC", "ES": "^IBEX", "JP": "^N225"}
+
+
+def load_benchmarks():
+    df = yf.download(list(BENCHMARK.values()), period="6mo", interval="1d", progress=False, auto_adjust=True)["Close"]
+    return {m: df[t].dropna() for m, t in BENCHMARK.items() if t in df}
+
+
+def eps_revisions(ticker):
+    """(subidas, bajadas) de estimaciones de BPA en 30 días para este año y el siguiente."""
+    try:
+        r = yf.Ticker(ticker).eps_revisions
+        rows = r.loc[[i for i in ("0y", "+1y") if i in r.index]]
+        return int(rows["upLast30days"].sum()), int(rows["downLast30days"].sum())
+    except Exception:
+        return None
+
+
+def timing(close, vol, bench, info, revisions=None):
+    """Señales de momento de entrada. Devuelve etiqueta, puntos y señales a favor/en contra.
+    No cambia la nota: indica si la caída parece estar frenando o si aún sigue."""
+    c = close.dropna()
+    v = vol.reindex(c.index).fillna(0)
+    pos, neg, pts = [], [], 0
+    if len(c) < 60:
+        return None
+    price = c.iloc[-1]
+    r = rsi(c)
+    sma20 = c.rolling(20).mean()
+    ema12, ema26 = c.ewm(span=12, adjust=False).mean(), c.ewm(span=26, adjust=False).mean()
+    macd = ema12 - ema26
+    hist = macd - macd.ewm(span=9, adjust=False).mean()
+
+    # 1. RSI sale de sobreventa
+    if r.iloc[-10:].min() < 32 and r.iloc[-1] > 32 and r.iloc[-1] > r.iloc[-4]:
+        pts += 2; pos.append(f"El RSI sale de sobreventa ({r.iloc[-10:].min():.0f} → {r.iloc[-1]:.0f})")
+    elif r.iloc[-1] < 30 and r.iloc[-1] < r.iloc[-4]:
+        neg.append(f"RSI {r.iloc[-1]:.0f} y todavía bajando")
+
+    # 2. Precio frente a su media de 20 sesiones
+    if price > sma20.iloc[-1]:
+        if (c.iloc[-8:-1] < sma20.iloc[-8:-1]).any():
+            pts += 2; pos.append("Acaba de recuperar su media de 20 sesiones")
+        else:
+            pts += 1; pos.append("Cotiza por encima de su media de 20 sesiones")
+    else:
+        pts -= 1; neg.append("Sigue por debajo de su media de 20 sesiones")
+
+    # 3. MACD
+    crossed = ((hist.shift(1) <= 0) & (hist > 0)).iloc[-5:].any()
+    if crossed:
+        pts += 1; pos.append("Cruce alcista del MACD en los últimos días")
+    elif hist.iloc[-1] < 0 and hist.iloc[-1] < hist.iloc[-3]:
+        pts -= 1; neg.append("El MACD sigue empeorando")
+
+    # 4. Capitulación: día de caída fuerte con volumen muy alto y sin nuevos mínimos después
+    rets = c.pct_change()
+    avgv = v.rolling(50).mean()
+    for i in range(-10, -1):
+        if avgv.iloc[i] > 0 and v.iloc[i] > 2 * avgv.iloc[i] and rets.iloc[i] < -0.03:
+            if c.iloc[i + 1:].min() >= c.iloc[i] * 0.99:
+                pts += 1; pos.append(f"Posible capitulación: volumen {v.iloc[i] / avgv.iloc[i]:.1f}x con caída y sin nuevos mínimos")
+            break
+
+    # 5. Nuevos mínimos recientes = la caída no ha parado
+    if c.iloc[-3:].min() <= c.iloc[-20:].min() * 1.001:
+        pts -= 2; neg.append("Ha marcado mínimos de 20 sesiones en los últimos 3 días")
+
+    # 6. Fuerza relativa frente a su índice (10 sesiones)
+    if bench is not None and len(bench) > 11:
+        b = bench.reindex(c.index).ffill()
+        rs = (c.iloc[-1] / c.iloc[-11]) - (b.iloc[-1] / b.iloc[-11])
+        if rs > 0.02:
+            pts += 1; pos.append(f"Lo hace mejor que su índice en 10 sesiones ({rs * 100:+.1f} pp)")
+        elif rs < -0.05:
+            pts -= 1; neg.append(f"Lo hace peor que su índice en 10 sesiones ({rs * 100:+.1f} pp)")
+
+    # 7. Resultados inminentes
+    ets = num(info.get("earningsTimestamp"))
+    if ets:
+        days = (datetime.fromtimestamp(ets, timezone.utc) - datetime.now(timezone.utc)).days
+        if 0 <= days <= 7:
+            pts -= 1; neg.append(f"Presenta resultados en {days} días: riesgo de salto brusco")
+
+    # 8. Revisiones de beneficios de los analistas (solo empresas mostradas)
+    if revisions:
+        up, down = revisions
+        if up > down * 1.5 and up >= 3:
+            pts += 1; pos.append(f"Analistas subiendo previsiones de beneficio ({up} al alza, {down} a la baja en 30 días)")
+        elif down > up * 1.5 and down >= 3:
+            pts -= 1; neg.append(f"Analistas bajando previsiones de beneficio ({down} a la baja, {up} al alza en 30 días)")
+
+    label = "giro" if pts >= 3 else "vigilar" if pts >= 1 else "esperar"
+    return {"label": label, "points": pts, "positive": pos, "negative": neg}
 
 
 # ---------------------------------------------------------------- macro y noticias
@@ -368,7 +467,9 @@ def notify(report):
         print("NTFY_TOPIC no definido: no se envía notificación")
         return
     top = report["top"][:3]
-    lines = [f"{o['ticker']} {o['score']:.0f}/100 · {o['name']}" for o in top] or ["Hoy no hay oportunidades claras."]
+    tag = {"giro": "🟢 giro", "vigilar": "🟡 vigilar", "esperar": "⚪ esperar"}
+    lines = [f"{o['ticker']} {o['score']:.0f}/100 {tag.get((o.get('timing') or {}).get('label'), '')} · {o['name']}"
+             for o in top] or ["Hoy no hay oportunidades claras."]
     m = {x["id"]: x for x in report["macro"]}
     if "CPIAUCSL" in m:
         lines.append(f"IPC EE. UU.: {m['CPIAUCSL']['value']}%")
@@ -407,8 +508,9 @@ def main():
     tickers = uni["ticker"].tolist()
     print(f"Analizando {len(tickers)} empresas…")
 
-    prices = load_prices(tickers)
+    prices, volumes = load_prices(tickers)
     infos = load_infos(tickers)
+    benchmarks = load_benchmarks()
 
     # PER mediano por sector (para comparar cada empresa con sus pares)
     pes = pd.DataFrame([{"sector": i.get("sector"), "pe": num(i.get("forwardPE")) or num(i.get("trailingPE"))}
@@ -439,6 +541,7 @@ def main():
             "upside": upside, "pe": pe, "roe": roe,
             "recommendation": info.get("recommendationKey"), "analysts": info.get("numberOfAnalystOpinions"),
             **{k: t[k] for k in ("price", "chg1d", "chg1m", "rsi", "vs_sma200", "drawdown", "spark")},
+            "timing": timing(prices[tk], volumes[tk], benchmarks.get(u["market"]), info),
         })
 
     df = pd.DataFrame(rows).sort_values("rank_score", ascending=False)
@@ -452,7 +555,10 @@ def main():
     shown = {}
     for r in top_records + [x for v in by_market.values() for x in v]:
         if r["ticker"] not in shown:
-            shown[r["ticker"]] = {"news": company_news(r), "isin": find_isin(r, isins)}
+            tk = r["ticker"]
+            shown[tk] = {"news": company_news(r), "isin": find_isin(r, isins),
+                         "timing": timing(prices[tk], volumes[tk], benchmarks.get(r["market"]),
+                                          infos.get(tk, {}), eps_revisions(tk))}
         r.update(shown[r["ticker"]])
     save_isin_cache(isins)
 
