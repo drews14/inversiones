@@ -385,7 +385,7 @@ function renderMetodo() {
   }
   html += `<h2>Reglas generales</h2><div class="card"><ul class="reasons">
     <li>Si a una empresa le falta más del 40 % de los datos, se descarta.</li>
-    <li>Solo cuenta como «oportunidad» con <b>${report.min_score ?? 45} puntos o más</b>.</li>
+    <li>Solo cuenta como «oportunidad» con <b>${report.min_score ?? 50} puntos o más</b>.</li>
     <li>Prioridad por mercado al ordenar el ranking global: 🇺🇸 ×${pts(MW.US)} · 🇪🇸 ×${pts(MW.ES)} · 🇯🇵 ×${pts(MW.JP)}. La ficha muestra la nota sin multiplicar.</li>
   </ul></div>`;
   html += `<h2>Momento de entrada ${infoBtn("timing")}</h2><div class="card">

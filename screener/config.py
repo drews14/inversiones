@@ -11,7 +11,7 @@ WEIGHTS = {"valuation": 30, "technical": 15, "quality": 30, "analysts": 25}
 # Cuántas empresas mostrar.
 TOP_GLOBAL = 5
 TOP_PER_MARKET = 5
-MIN_SCORE = 45            # por debajo de esto no se considera "oportunidad"
+MIN_SCORE = 50            # por debajo de esto no se considera "oportunidad"
 MIN_DATA_COVERAGE = 0.6   # fracción mínima de métricas disponibles
 
 # Índices y activos de mercado para el panel macro (ticker Yahoo -> etiqueta)
