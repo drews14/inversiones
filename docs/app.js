@@ -204,39 +204,71 @@ $("#sheet").addEventListener("click", (e) => {
 // El fondo oscuro no debe desplazar nada
 $(".sheet-backdrop").addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
 
-// --- Deslizar hacia abajo para cerrar (solo cuando la ficha está arriba del todo)
+// --- Deslizar hacia abajo para cerrar
+// Tirador: zona de arrastre propia con Pointer Events (fiable en iOS, sin conflicto con el scroll).
+// Contenido: solo arrastra si la ficha está arriba del todo; si no, desplaza el contenido.
 (() => {
-  const panel = $(".sheet-panel"), backdrop = $(".sheet-backdrop");
-  let startY = 0, dy = 0, dragging = false, armed = false;
-  panel.addEventListener("touchstart", (e) => {
-    startY = e.touches[0].clientY; dy = 0; dragging = false;
-    armed = panel.scrollTop <= 0;
-  }, { passive: true });
-  panel.addEventListener("touchmove", (e) => {
-    if (!armed) return;
-    dy = e.touches[0].clientY - startY;
-    if (dy > 0) {
-      dragging = true;
-      e.preventDefault(); // evita el rebote que arrastraba la página de atrás
-      panel.classList.add("dragging"); panel.classList.remove("snap");
-      panel.style.transform = `translateY(${dy}px)`;
-      backdrop.style.opacity = String(Math.max(0.2, 1 - dy / 400));
-    } else if (dragging) {
-      panel.style.transform = "";
-    }
-  }, { passive: false });
-  panel.addEventListener("touchend", () => {
+  const panel = $(".sheet-panel"), backdrop = $(".sheet-backdrop"), handle = $(".sheet-top");
+  let startY = 0, lastY = 0, lastT = 0, vel = 0, dy = 0, dragging = false;
+
+  const begin = (y) => { startY = lastY = y; lastT = performance.now(); vel = 0; dy = 0; dragging = false; };
+  const move = (y) => {
+    const now = performance.now();
+    vel = (y - lastY) / Math.max(1, now - lastT); // px/ms, positivo hacia abajo
+    lastY = y; lastT = now;
+    dy = Math.max(0, y - startY);
+    if (!dragging && dy < 4) return false;
+    dragging = true;
+    panel.classList.add("dragging"); panel.classList.remove("snap");
+    panel.style.transform = `translateY(${dy}px)`;
+    backdrop.style.opacity = String(Math.max(0.15, 1 - dy / 450));
+    return true;
+  };
+  const end = () => {
     if (!dragging) return;
+    dragging = false;
     panel.classList.remove("dragging"); panel.classList.add("snap");
-    if (dy > 110) {
+    // Cierra si se arrastra lo suficiente o con un gesto rápido hacia abajo
+    if (dy > 90 || (dy > 25 && vel > 0.45)) {
       panel.style.transform = "translateY(100%)";
+      backdrop.style.opacity = "0";
       setTimeout(closeSheet, 200);
     } else {
       panel.style.transform = "";
       backdrop.style.opacity = "";
     }
-    dragging = false;
+  };
+
+  // 1) Tirador
+  handle.addEventListener("pointerdown", (e) => {
+    if (e.target.closest(".sheet-close")) return;
+    handle.setPointerCapture(e.pointerId);
+    begin(e.clientY);
+    e.preventDefault();
   });
+  handle.addEventListener("pointermove", (e) => { if (handle.hasPointerCapture(e.pointerId)) move(e.clientY); });
+  handle.addEventListener("pointerup", end);
+  handle.addEventListener("pointercancel", end);
+
+  // 2) Resto de la ficha (táctil)
+  let armed = false;
+  panel.addEventListener("touchstart", (e) => {
+    if (e.target.closest(".sheet-top")) { armed = false; return; }
+    armed = panel.scrollTop <= 0;
+    begin(e.touches[0].clientY);
+  }, { passive: true });
+  panel.addEventListener("touchmove", (e) => {
+    if (!armed) return;
+    const y = e.touches[0].clientY;
+    if (y - startY > 0) {
+      e.preventDefault(); // evita el rebote que arrastraba la página de atrás
+      move(y);
+    } else if (!dragging) {
+      armed = false; // el gesto va hacia arriba: dejar que desplace el contenido
+    }
+  }, { passive: false });
+  panel.addEventListener("touchend", end);
+  panel.addEventListener("touchcancel", end);
 })();
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
 

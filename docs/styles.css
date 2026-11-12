@@ -128,8 +128,8 @@ body.locked { position: fixed; left: 0; right: 0; overflow: hidden; }
 @keyframes up { from { transform: translateY(40px); opacity: 0; } }
 .sheet-panel.dragging { transition: none; }
 .sheet-panel.snap { transition: transform .22s ease-out; }
-.sheet-top { position: sticky; top: -8px; z-index: 2; background: var(--bg); margin: -8px -16px 0; padding: 8px 16px 4px; height: 50px; display: flex; justify-content: center; align-items: flex-start; }
-.sheet-grip { width: 40px; height: 5px; border-radius: 3px; background: var(--muted); opacity: .5; margin: 4px auto 8px; }
+.sheet-top { position: sticky; top: -8px; z-index: 2; background: var(--bg); margin: -8px -16px 0; padding: 8px 16px 4px; height: 50px; display: flex; justify-content: center; align-items: flex-start; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.sheet-grip { width: 44px; height: 5px; border-radius: 3px; background: var(--muted); opacity: .5; margin: 4px auto 8px; }
 .sheet-close { position: absolute; right: 12px; top: 6px; width: 30px; height: 30px; border-radius: 15px; background: var(--card-2); color: var(--muted); font-size: 15px; line-height: 30px; }
 .detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .detail-head h3 { margin: 0; font-size: 24px; }
