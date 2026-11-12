@@ -20,20 +20,28 @@
     <h1 id="title">Oportunidades</h1>
     <p id="subtitle" class="muted">Cargando informe…</p>
   </div>
-  <button id="refresh" class="icon-btn" aria-label="Recargar">↻</button>
+  <div class="top-actions">
+    <div class="mode" role="group" aria-label="Modo">
+      <button data-mode="basico">Básico</button><button data-mode="experto">Experto</button>
+    </div>
+    <button id="refresh" class="icon-btn" aria-label="Recargar">↻</button>
+  </div>
 </header>
 
 <main>
   <section id="tab-hoy" class="tab active"></section>
   <section id="tab-mercados" class="tab"></section>
-  <section id="tab-macro" class="tab"></section>
+  <section id="tab-bolsas" class="tab"></section>
+  <section id="tab-economia" class="tab"></section>
+  <section id="tab-basico" class="tab"></section>
   <section id="tab-historico" class="tab"></section>
 </main>
 
 <nav class="tabbar">
   <button data-tab="hoy" class="active"><span>★</span>Hoy</button>
   <button data-tab="mercados"><span>◎</span>Mercados</button>
-  <button data-tab="macro"><span>∿</span>Macro</button>
+  <button data-tab="bolsas"><span>∿</span>Bolsas</button>
+  <button data-tab="economia"><span>€</span>Economía</button>
   <button data-tab="historico"><span>☰</span>Histórico</button>
 </nav>
 
@@ -45,6 +53,15 @@
   </div>
 </div>
 
+<div id="gloss" class="gloss" hidden>
+  <div class="gloss-card" role="dialog" aria-modal="true">
+    <h4 id="gloss-title"></h4>
+    <p id="gloss-text"></p>
+    <button class="btn" id="gloss-ok">Entendido</button>
+  </div>
+</div>
+
+<script src="glossary.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

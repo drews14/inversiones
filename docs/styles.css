@@ -157,3 +157,66 @@ ul.reasons li { margin: 4px 0; }
 .sig-pos, .sig-neg { margin-top: 10px; list-style: none; padding-left: 0; font-size: 14px; }
 .sig-pos li::before { content: "▲ "; color: var(--up); }
 .sig-neg li::before { content: "▼ "; color: var(--down); }
+
+/* Selector de modo */
+.top-actions { display: flex; align-items: center; gap: 8px; }
+.mode { display: flex; background: var(--card-2); border-radius: 10px; padding: 3px; }
+.mode button { padding: 6px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.mode button.active { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+.top h1 { font-size: 26px; }
+body.basic .tabbar { display: none; }
+body.basic { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+
+/* Botón ⓘ y ventana de explicación */
+.info { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--muted);
+  color: var(--muted); font: italic 700 11px/1 Georgia, serif; vertical-align: 1px; margin-left: 2px; padding: 0; flex: none; text-transform: none; letter-spacing: 0; }
+.gloss { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .45); display: grid; place-items: center; padding: 24px; }
+.gloss[hidden] { display: none; }
+.gloss-card { background: var(--card); border-radius: 18px; padding: 20px; max-width: 420px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,.3); }
+.gloss-card h4 { margin: 0 0 8px; font-size: 18px; }
+.gloss-card p { margin: 0 0 16px; line-height: 1.5; }
+.gloss-card .btn { background: var(--card-2); box-shadow: none; width: 100%; }
+.btn-row { display: flex; align-items: center; gap: 8px; }
+.btn-row .btn { flex: 1; }
+
+/* Vista básica */
+#tab-basico { font-size: 17px; line-height: 1.5; }
+.b-card { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 18px; margin: 12px 0; }
+.b-card h3 { margin: 0; font-size: 22px; }
+.b-card h4 { margin: 16px 0 6px; font-size: 16px; }
+.b-card p { margin: 8px 0; }
+.b-intro p { margin: 10px 0; }
+.b-h2 { font-size: 15px; margin-top: 28px; }
+.b-sub { color: var(--muted); font-size: 15px; margin-top: 2px; }
+.b-moment { margin: 12px 0 4px; padding: 10px 12px; border-radius: 12px; font-weight: 700; background: var(--card-2); }
+.b-moment.b-giro { background: var(--accent-soft); color: var(--up); }
+.b-moment.b-vigilar { background: var(--warn-soft); color: var(--warn); }
+.b-list { margin: 0; padding-left: 0; list-style: none; }
+.b-list li { margin: 6px 0; padding-left: 26px; position: relative; }
+.b-list.yes li::before { content: "✓"; position: absolute; left: 4px; color: var(--up); font-weight: 700; }
+.b-list.no li::before { content: "✗"; position: absolute; left: 4px; color: var(--down); font-weight: 700; }
+.b-news { margin: 6px 0 0; padding-left: 18px; font-size: 15px; }
+.b-news li { margin: 6px 0; }
+.b-news a { color: var(--text); text-decoration: underline; text-decoration-color: var(--line); }
+.meters { display: grid; gap: 8px; margin-top: 12px; }
+.meter { display: flex; align-items: center; gap: 10px; }
+.meter-label { flex: 1; }
+.meter-val { width: 56px; text-align: right; font-weight: 600; }
+.dots { display: flex; gap: 4px; }
+.dots i { width: 22px; height: 10px; border-radius: 5px; background: var(--card-2); }
+.dots.gain i.on { background: var(--up); }
+.dots.risk i.on { background: var(--warn); }
+.b-card .btn.primary { margin-top: 16px; }
+.b-warn { background: var(--warn-soft); font-size: 15px; }
+
+.tr-help { font-size: 13px; color: var(--muted); margin: 6px 4px 0; line-height: 1.4; }
+.toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); opacity: 0;
+  background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 600; z-index: 40; transition: .2s; pointer-events: none; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.b-moment-text { font-size: 15px; color: var(--muted); margin: 6px 2px 0; }
+.b-list.dot li::before { content: "•"; position: absolute; left: 8px; color: var(--muted); font-weight: 700; }
+.b-list.bell li::before { content: "→"; position: absolute; left: 4px; color: var(--accent); font-weight: 700; }
+.b-list.warn li::before { content: "!"; position: absolute; left: 8px; color: var(--warn); font-weight: 800; }
+.when-good { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14px; }
+.when-good ul { margin-top: 4px; }

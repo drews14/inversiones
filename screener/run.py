@@ -22,6 +22,7 @@ import yfinance as yf
 
 sys.path.insert(0, str(Path(__file__).parent))
 import config as C  # noqa: E402
+import basic  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "data"
@@ -532,7 +533,7 @@ def main():
             continue
         total = sum(blocks[k] * C.WEIGHTS[k] for k in blocks)
         rows.append({
-            "ticker": tk, "name": info.get("shortName") or u["name"], "market": u["market"],
+            "ticker": tk, "name": info.get("shortName") or u["name"], "short": u["name"], "market": u["market"],
             "market_label": C.MARKET_LABEL[u["market"]], "index": u["index"],
             "sector": info.get("sector") or u.get("sector") or "", "currency": info.get("currency", ""),
             "score": round(total, 1), "rank_score": round(total * C.MARKET_WEIGHT[u["market"]], 1),
@@ -559,6 +560,13 @@ def main():
             shown[tk] = {"news": company_news(r), "isin": find_isin(r, isins),
                          "timing": timing(prices[tk], volumes[tk], benchmarks.get(r["market"]),
                                           infos.get(tk, {}), eps_revisions(tk))}
+            name = r["short"] if r["market"] == "ES" else str(r["name"]).split(",")[0]
+            kw = " ".join(basic.keywords(name)) or name
+            news_es = news_for(f'"{kw}" acciones', 6, "es")
+            bench = benchmarks.get(r["market"])
+            bench_1m = float(bench.iloc[-1] / bench.iloc[-22] - 1) if bench is not None and len(bench) > 22 else None
+            shown[tk]["basic"] = basic.company({**r, **shown[tk], "name": name}, infos.get(tk, {}), prices[tk],
+                                               news_es, bench_1m)
         r.update(shown[r["ticker"]])
     save_isin_cache(isins)
 
@@ -574,10 +582,12 @@ def main():
         "markets": markets,
         "sentiment": sentiment(prices, uni, markets),
         "macro": fred(),
+        "basic_news": news_for("bolsa Wall Street IBEX", 4, "es"),
         "market_news": {k: news_for(q, 5, lang) for k, (q, lang) in C.MARKET_NEWS.items()},
         "top": top_records,
         "by_market": by_market,
     }
+    report["basic_market"] = basic.market(report)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "history").mkdir(exist_ok=True)
     js = json.dumps(clean(report), ensure_ascii=False, default=str, allow_nan=False)
