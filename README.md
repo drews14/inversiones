@@ -48,3 +48,15 @@ Todo se ajusta en [`screener/config.py`](screener/config.py).
 .venv/bin/python screener/run.py --no-notify   # genera docs/data/report.json
 .venv/bin/python -m http.server 8765 --directory docs
 ```
+
+## Ejecución desde el Mac (modo actual)
+
+Las Actions de GitHub están bloqueadas en la cuenta, así que el informe lo genera el Mac:
+
+- Tarea de launchd: `~/Library/LaunchAgents/com.inversiones.informe.plist`, de lunes a viernes a las 7:40.
+- Se ejecuta desde una copia fuera de Documentos (`~/.inversiones-informe`), porque macOS bloquea que las tareas programadas accedan a Documentos.
+- Registro: `~/.inversiones-informe/logs/informe.log`.
+- Lanzarlo a mano: `launchctl kickstart gui/$(id -u)/com.inversiones.informe`
+- Desactivarlo: `launchctl bootout gui/$(id -u)/com.inversiones.informe`
+- Si cambias el código en Documentos, haz `git push`; la copia del Mac hace `git pull` antes de cada informe.
+- Para volver a la nube cuando GitHub desbloquee la cuenta: `gh workflow enable "Informe diario"` y desactiva la tarea del Mac.
