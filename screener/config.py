@@ -8,7 +8,7 @@ MARKET_LABEL = {"US": "EE. UU.", "ES": "España", "JP": "Japón"}
 WEIGHTS = {"valuation": 25, "technical": 25, "quality": 25, "analysts": 25}
 
 # Cuántas empresas mostrar.
-TOP_GLOBAL = 15
+TOP_GLOBAL = 5
 TOP_PER_MARKET = 5
 MIN_SCORE = 45            # por debajo de esto no se considera "oportunidad"
 MIN_DATA_COVERAGE = 0.6   # fracción mínima de métricas disponibles
@@ -44,7 +44,6 @@ FRED_SERIES = {
 }
 
 NEWS_PER_TICKER = 3
-NEWS_TOP_TICKERS = 10
 
 # Noticias de mercado (Google News): sección -> (búsqueda, idioma)
 MARKET_NEWS = {

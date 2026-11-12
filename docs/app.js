@@ -72,14 +72,15 @@ function renderHoy() {
       <div class="t-val num">${fmt(m.value, m.id === "SPREAD_ES" ? 0 : 2)}</div>
       <div class="t-chg muted">antes ${fmt(m.prev, m.id === "SPREAD_ES" ? 0 : 2)} · ${esc(m.date)}</div></div>`).join("")}</div>`;
   }
-  html += `<h2>Top oportunidades (${r.top.length})</h2>`;
-  html += r.top.length ? `<div class="list" id="top-list">${r.top.map(oppRow).join("")}</div>`
+  const top5 = r.top.slice(0, 5);
+  html += `<h2>Las 5 mejores de hoy</h2>`;
+  html += top5.length ? `<div class="list" id="top-list">${top5.map(oppRow).join("")}</div>`
     : `<div class="card empty">Hoy ninguna empresa supera el umbral mínimo.</div>`;
   html += `<p class="disclaimer">Analizadas ${r.analyzed} de ${r.universe_size} empresas · ${r.candidates} superan el umbral.
     Esto es un filtro automático según tus criterios, no una recomendación de inversión. Revisa siempre cada empresa antes de decidir.</p>`;
   el.innerHTML = html;
   const list = $("#top-list");
-  if (list) bindOpps(list, r.top);
+  if (list) bindOpps(list, top5);
 }
 
 function renderMercados() {
@@ -167,6 +168,11 @@ function openDetail(o) {
       <div><span>Analistas</span><span>${o.analysts ?? "—"}</span></div>
       <div><span>Consenso</span><span>${REC[o.recommendation] || esc(o.recommendation) || "—"}</span></div>
     </div>
+    <div class="actions">
+      ${o.isin ? `<a class="btn primary" href="https://app.traderepublic.com/instrument/${esc(o.isin)}" target="_blank" rel="noopener">Abrir en Trade Republic</a>
+        <button class="btn" data-copy="${esc(o.isin)}">Copiar ISIN · ${esc(o.isin)}</button>` : ""}
+      <a class="btn" href="https://finance.yahoo.com/quote/${encodeURIComponent(o.ticker)}" target="_blank" rel="noopener">Ver en Yahoo Finance</a>
+    </div>
     ${(o.news || []).length ? `<h2>Noticias</h2>${newsList(o.news)}` : ""}
     <p class="disclaimer">Datos de Yahoo Finance, FRED y Google News. Pueden tener retrasos o errores.</p>`;
   const sh = $("#sheet");
@@ -198,7 +204,13 @@ function closeSheet() {
   sh.querySelector(".sheet-backdrop").style.opacity = "";
   unlockScroll();
 }
-$("#sheet").addEventListener("click", (e) => {
+$("#sheet").addEventListener("click", async (e) => {
+  const cp = e.target.closest("[data-copy]");
+  if (cp) {
+    try { await navigator.clipboard.writeText(cp.dataset.copy); cp.textContent = "ISIN copiado ✓"; }
+    catch { cp.textContent = cp.dataset.copy; }
+    return;
+  }
   if (e.target.classList.contains("sheet-backdrop") || e.target.closest(".sheet-close")) closeSheet();
 });
 // El fondo oscuro no debe desplazar nada

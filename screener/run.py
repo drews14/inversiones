@@ -7,6 +7,7 @@ import argparse
 import io
 import json
 import math
+import re
 import os
 import sys
 import time
@@ -304,6 +305,62 @@ def company_news(r):
     return news_for(f'"{name}" stock' if lang == "en" else f'"{name}" bolsa', C.NEWS_PER_TICKER, lang)
 
 
+# ---------------------------------------------------------------- ISIN (para enlazar con el bróker)
+ISIN_CACHE = ROOT / "data" / "isin.json"
+ISIN_PREFIX = {"ES": ("ES",), "JP": ("JP",), "US": ("US",)}
+
+
+def isin_ok(code):
+    """Valida el dígito de control de un ISIN."""
+    if not re.fullmatch(r"[A-Z]{2}[A-Z0-9]{9}[0-9]", code or ""):
+        return False
+    digits = "".join(str(int(ch, 36)) for ch in code[:-1])
+    total = 0
+    for i, d in enumerate(reversed(digits)):
+        n = int(d) * (2 if i % 2 == 0 else 1)
+        total += n // 10 + n % 10
+    return (10 - total % 10) % 10 == int(code[-1])
+
+
+def load_isin_cache():
+    try:
+        return json.loads(ISIN_CACHE.read_text())
+    except Exception:
+        return {}
+
+
+def save_isin_cache(cache):
+    ISIN_CACHE.write_text(json.dumps(cache, indent=0, sort_keys=True))
+
+
+def find_isin(r, cache):
+    tk = r["ticker"]
+    if tk in cache:
+        return cache[tk]
+    from urllib.parse import quote
+    name = re.sub(r"[,.]|\b(Inc|Corp|Corporation|Co|Ltd|plc|S\.?A|N\.?V|Holdings?|Group)\b", " ", str(r["name"]))
+    name = " ".join(name.split()[:3])
+    base = tk.split(".")[0].upper()
+    found = None
+    try:
+        txt = requests.get("https://markets.businessinsider.com/ajax/SearchController_Suggest?max_results=25&query="
+                           + quote(name), timeout=15).text
+        entries = re.findall(r'new Array\("([^"]*)", "Stocks", "([^"]*)"', txt)
+        good = []
+        for _, kw in entries:
+            parts = kw.split("|")
+            if len(parts) > 1 and parts[1][:2] in ISIN_PREFIX[r["market"]] and isin_ok(parts[1]):
+                good.append(parts)
+        # preferimos la que coincide con el ticker; si no, la primera del país correcto
+        exact = [p for p in good if base in (p[0].upper(), p[-1].upper())]
+        found = (exact or good or [[None, None]])[0][1]
+    except Exception as e:
+        print("ISIN error", tk, e)
+    if found:
+        cache[tk] = found
+    return found
+
+
 # ---------------------------------------------------------------- notificación
 def notify(report):
     topic = os.environ.get("NTFY_TOPIC")
@@ -390,8 +447,14 @@ def main():
     by_market = {m: cand[cand.market == m].head(C.TOP_PER_MARKET).to_dict("records") for m in C.MARKET_WEIGHT}
 
     top_records = top.to_dict("records")
-    for r in top_records[:C.NEWS_TOP_TICKERS]:
-        r["news"] = company_news(r)
+    # Noticias e ISIN para todas las empresas que se muestran (top + cada mercado)
+    isins = load_isin_cache()
+    shown = {}
+    for r in top_records + [x for v in by_market.values() for x in v]:
+        if r["ticker"] not in shown:
+            shown[r["ticker"]] = {"news": company_news(r), "isin": find_isin(r, isins)}
+        r.update(shown[r["ticker"]])
+    save_isin_cache(isins)
 
     markets = macro_panel()
     report = {
