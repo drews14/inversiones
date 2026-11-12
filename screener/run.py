@@ -313,6 +313,65 @@ def timing(close, vol, bench, info, revisions=None):
     return {"label": label, "points": pts, "positive": pos, "negative": neg}
 
 
+# ---------------------------------------------------------------- riesgo: empieza a caer
+def downside(close, vol, bench, info):
+    """Señales de que una acción que iba bien empieza a caer. Devuelve None si no aplica.
+    Cada señal: (puntos, texto técnico, texto sencillo)."""
+    c = close.dropna()
+    if len(c) < 120:
+        return None
+    v = vol.reindex(c.index).fillna(0)
+    price = c.iloc[-1]
+    dd52 = price / c.max() - 1
+    if dd52 < -0.35:  # ya se ha desplomado: eso es otra historia (cuchillo cayendo)
+        return None
+    sma50, sma200 = c.rolling(50).mean(), c.rolling(200, min_periods=120).mean()
+    ema12, ema26 = c.ewm(span=12, adjust=False).mean(), c.ewm(span=26, adjust=False).mean()
+    hist = (ema12 - ema26) - (ema12 - ema26).ewm(span=9, adjust=False).mean()
+    r = rsi(c)
+    sig = []
+
+    if price < sma50.iloc[-1]:
+        if (c.iloc[-6:-1] >= sma50.iloc[-6:-1]).any():
+            sig.append((20, "Acaba de perder su media de 50 sesiones", "Ha roto la tendencia de las últimas semanas."))
+        else:
+            sig.append((8, "Cotiza por debajo de su media de 50 sesiones", "Lleva unas semanas por debajo de su precio medio."))
+    if price < sma200.iloc[-1] and (c.iloc[-11:-1] >= sma200.iloc[-11:-1]).any():
+        sig.append((20, "Acaba de perder su media de 200 sesiones", "Ha roto la tendencia de todo el año: suele ser una señal seria."))
+    if ((hist.shift(1) > 0) & (hist <= 0)).iloc[-5:].any():
+        sig.append((15, "Cruce bajista del MACD en los últimos días", "El impulso ha cambiado de subida a bajada."))
+    hi20 = c.iloc[-20:].max()
+    d20 = price / hi20 - 1
+    if d20 < -0.04:
+        sig.append((round(clamp01((-d20 - 0.04) / 0.12) * 15), f"Cae un {-d20 * 100:.0f}% desde su máximo de hace pocas semanas",
+                    "Ha bajado bastante desde su precio más alto de las últimas semanas."))
+    if r.iloc[-15:].max() > 60 and r.iloc[-1] < 45:
+        sig.append((10, f"RSI de {r.iloc[-15:].max():.0f} a {r.iloc[-1]:.0f} en pocas sesiones", "Ha perdido fuerza muy deprisa."))
+    if bench is not None and len(bench) > 11:
+        b = bench.reindex(c.index).ffill()
+        rs = (c.iloc[-1] / c.iloc[-11]) - (b.iloc[-1] / b.iloc[-11])
+        if rs < -0.04:
+            sig.append((10, f"Peor que su índice en 10 sesiones ({rs * 100:+.1f} pp)", "Lo está haciendo peor que el resto de la bolsa."))
+    rets, avgv = c.pct_change(), v.rolling(50).mean()
+    for i in range(-5, 0):
+        if avgv.iloc[i] > 0 and v.iloc[i] > 1.8 * avgv.iloc[i] and rets.iloc[i] < -0.02:
+            sig.append((10, f"Venta con volumen {v.iloc[i] / avgv.iloc[i]:.1f}x la media", "Hubo un día de muchas ventas: grandes inversores pueden estar saliendo."))
+            break
+    score = min(100, sum(s_[0] for s_ in sig))
+    if score < 35:
+        return None
+    flags = []
+    ets = num(info.get("earningsTimestamp"))
+    if ets:
+        days = (datetime.fromtimestamp(ets, timezone.utc) - datetime.now(timezone.utc)).days
+        if 0 <= days <= 7:
+            flags.append(f"Presenta resultados en {days} días: puede moverse con fuerza en cualquier dirección.")
+    return {"score": score, "level": "alta" if score >= 55 else "atencion",
+            "signals": [s_[1] for s_ in sorted(sig, reverse=True)],
+            "plain": [s_[2] for s_ in sorted(sig, reverse=True)], "flags": flags,
+            "from_high": round(float(dd52), 4)}
+
+
 # ---------------------------------------------------------------- macro y noticias
 def macro_panel():
     tick = list(C.MARKET_PANEL)
@@ -539,9 +598,12 @@ def main():
             "blocks": {k: round(blocks[k] * C.WEIGHTS[k], 1) for k in blocks},
             "reasons": reasons, "flags": flags, "coverage": round(cov, 2),
             "upside": upside, "pe": pe, "roe": roe,
+            "target": num(info.get("targetMeanPrice")), "target_low": num(info.get("targetLowPrice")),
+            "target_high": num(info.get("targetHighPrice")),
             "recommendation": info.get("recommendationKey"), "analysts": info.get("numberOfAnalystOpinions"),
             **{k: t[k] for k in ("price", "chg1d", "chg1m", "rsi", "vs_sma200", "drawdown", "spark")},
             "timing": timing(prices[tk], volumes[tk], benchmarks.get(u["market"]), info),
+            "risk": downside(prices[tk], volumes[tk], benchmarks.get(u["market"]), info),
         })
 
     df = pd.DataFrame(rows).sort_values("rank_score", ascending=False)
@@ -567,6 +629,24 @@ def main():
             shown[tk]["basic"] = basic.company({**r, **shown[tk], "name": name}, infos.get(tk, {}), prices[tk],
                                                news_es, bench_1m)
         r.update(shown[r["ticker"]])
+    # Riesgo de caída: las que más señales de deterioro tienen (prioridad EE. UU. igual que arriba)
+    rk = df[df["risk"].notna()].copy()
+    rk["risk_score"] = rk["risk"].apply(lambda x: x["score"])
+    rk["risk_rank"] = rk.apply(lambda x: x["risk_score"] * C.MARKET_WEIGHT[x["market"]], axis=1)
+    rk = rk.sort_values(["risk_rank", "score"], ascending=False)
+    risk_top = rk.head(C.TOP_GLOBAL).to_dict("records")
+    risk_by_market = {m: rk[rk.market == m].head(C.TOP_PER_MARKET).to_dict("records") for m in C.MARKET_WEIGHT}
+    for r in risk_top + [x for v in risk_by_market.values() for x in v]:
+        tk = r["ticker"]
+        if tk not in shown:
+            shown[tk] = {"news": company_news(r), "isin": find_isin(r, isins)}
+            name = r["short"] if r["market"] == "ES" else str(r["name"]).split(",")[0]
+            news_es = basic.relevant(news_for(f'"{" ".join(basic.keywords(name)) or name}" acciones', 6, "es"), name, tk)
+            rev = eps_revisions(tk)
+            shown[tk]["risk_news_es"] = news_es[:3]
+            shown[tk]["risk_bad_news"] = [n["title"] for n in news_es if basic.news_tone([n]) == "malas"][:2]
+            shown[tk]["risk_revisions_down"] = bool(rev and rev[1] > rev[0] * 1.5 and rev[1] >= 3)
+        r.update({k: v for k, v in shown[tk].items() if k not in ("timing", "basic")})
     save_isin_cache(isins)
 
     markets = macro_panel()
@@ -585,6 +665,9 @@ def main():
         "basic_news": news_for("bolsa Wall Street IBEX", 4, "es"),
         "market_news": {k: news_for(q, 5, lang) for k, (q, lang) in C.MARKET_NEWS.items()},
         "top": top_records,
+        "risk_top": risk_top,
+        "risk_by_market": risk_by_market,
+        "risk_count": int(len(rk)),
         "by_market": by_market,
     }
     report["basic_market"] = basic.market(report)

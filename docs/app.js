@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "10";
+const APP_VERSION = "11";
 
 const FLAG = { US: `<span class="mk">US</span>`, ES: `<span class="mk">ES</span>`, JP: `<span class="mk">JP</span>` };
 const BLOCK_LABEL = { valuation: "Valoración", technical: "Sobreventa técnica", quality: "Calidad / fiabilidad", analysts: "Consenso analistas" };
@@ -51,6 +51,9 @@ function fallbackCopy(text) {
 }
 
 let report = null;
+let listMode = "opp"; // "opp" = oportunidades · "risk" = riesgo de caída
+try { listMode = localStorage.getItem("lista") || "opp"; } catch {}
+const RISK_LEVEL = { alta: ["Alerta alta", "r-alta"], atencion: ["Atención", "r-atencion"] };
 let viewingDate = null; // null = informe de hoy
 let marketSel = "US";
 
@@ -88,22 +91,134 @@ function oppRow(o, i) {
           <div class="opp-tk">${FLAG[o.market] || ""} ${esc(o.ticker)} ${timingPill(o.timing)}</div>
           <div class="opp-name">${esc(o.name)}</div>
         </div>
-        <div class="opp-price num">${money(o.price, o.currency)}<br><span class="${cls(o.chg1d)}">${pct(o.chg1d)}</span></div>
+        <div class="opp-price num">${money(o.price, o.currency)}<br><span class="${cls(o.chg1d)}">${pct(o.chg1d)}</span>
+          ${o.target ? `<br><small class="muted">Obj. ${money(o.target, o.currency)}</small>` : ""}</div>
       </div>
       <div class="chips">${chips}</div>
     </div>
   </button>`;
 }
 
+function modeSeg() {
+  return `<div class="seg seg-mode">
+    <button data-lm="opp" class="${listMode === "opp" ? "active" : ""}">Oportunidades</button>
+    <button data-lm="risk" class="${listMode === "risk" ? "active risk" : ""}">Riesgo de caída</button></div>`;
+}
+function bindModeSeg(el) {
+  el.querySelectorAll("[data-lm]").forEach((b) => b.addEventListener("click", () => {
+    listMode = b.dataset.lm;
+    try { localStorage.setItem("lista", listMode); } catch {}
+    renderHoy(); renderMercados();
+  }));
+}
+
+function riskRow(o, i) {
+  const k = o.risk, [lvl, lcls] = RISK_LEVEL[k.level] || ["", ""];
+  return `<button class="opp" data-i="${i}">
+    <div class="ring ring-risk" style="--p:${k.score}"><span class="num">${k.score}</span></div>
+    <div class="opp-main">
+      <div class="opp-head">
+        <div style="min-width:0">
+          <div class="opp-tk">${FLAG[o.market] || ""} ${esc(o.ticker)} <span class="tpill ${lcls}">${lvl}</span></div>
+          <div class="opp-name">${esc(o.name)}</div>
+        </div>
+        <div class="opp-price num">${money(o.price, o.currency)}<br><span class="${cls(o.chg1d)}">${pct(o.chg1d)}</span>
+          ${o.target ? `<br><small class="muted">Obj. ${money(o.target, o.currency)}</small>` : ""}</div>
+      </div>
+      <div class="chips">${k.signals.slice(0, 2).map((x) => `<span class="chip warn">${esc(x)}</span>`).join("")}</div>
+    </div>
+  </button>`;
+}
+
+function targetBlock(o) {
+  if (!o.target) return "";
+  const lo = o.target_low, hi = o.target_high, p = o.price;
+  let bar = "";
+  if (lo && hi && hi > lo) {
+    const min = Math.min(lo, p), max = Math.max(hi, p), span = max - min;
+    const x = (v) => (((v - min) / span) * 100).toFixed(1);
+    bar = `<div class="tgt-bar"><i class="tgt-range" style="left:${x(lo)}%;width:${(x(hi) - x(lo)).toFixed(1)}%"></i>
+      <i class="tgt-mark tgt-mean" style="left:${x(o.target)}%"></i><i class="tgt-mark tgt-now" style="left:${x(p)}%"></i></div>
+      <div class="tgt-legend"><span>Mín. ${money(lo, o.currency)}</span><span>Máx. ${money(hi, o.currency)}</span></div>`;
+  }
+  return `<h2>Precio objetivo ${infoBtn("target")}</h2><div class="card">
+    <div class="tgt-top"><div><small class="muted">Precio actual</small><b class="num">${money(p, o.currency)}</b></div>
+      <div style="text-align:right"><small class="muted">Objetivo medio</small><b class="num">${money(o.target, o.currency)}</b>
+      <small class="${cls(o.upside)} num">${pct(o.upside, 0)}</small></div></div>
+    ${bar}
+    <small class="muted">${o.analysts ? `Media de ${o.analysts} analistas. ` : ""}La barra gris es el rango entre el objetivo más bajo y el más alto; la marca verde es la media de los analistas y la otra marca, el precio de hoy.</small></div>`;
+}
+
+function showSheet(html) {
+  $("#sheet-body").innerHTML = html;
+  const sh = $("#sheet");
+  if (sh.hidden) lockScroll();
+  sh.hidden = false;
+  const panel = sh.querySelector(".sheet-panel");
+  panel.style.transform = "";
+  panel.scrollTop = 0;
+}
+
+function openRiskDetail(o) {
+  const k = o.risk, [lvl, lcls] = RISK_LEVEL[k.level] || ["", ""];
+  showSheet(`
+    <div class="detail-head"><div>
+      <h3>${FLAG[o.market] || ""} ${esc(o.ticker)}</h3>
+      <div class="muted">${esc(o.name)}</div>
+      <div class="muted" style="font-size:12px">${esc(o.index)} · ${esc(o.sector)}</div></div>
+      <div class="ring ring-risk" data-g="risk" style="--p:${k.score};width:58px;height:58px;cursor:pointer"><span class="num" style="width:46px;height:46px;font-size:18px">${k.score}</span></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <div class="num" style="font-size:22px;font-weight:700">${money(o.price, o.currency)}</div>
+        <div class="num"><span class="${cls(o.chg1d)}">${pct(o.chg1d)} hoy</span> · <span class="${cls(o.chg1m)}">${pct(o.chg1m)} 1m</span></div>
+      </div>
+      ${spark(o.spark)}
+      <div class="muted" style="font-size:12px">Últimas 60 sesiones</div>
+    </div>
+    <h2>Riesgo de caída ${infoBtn("risk")}</h2>
+    <div class="card"><div style="display:flex;align-items:center;gap:10px"><span class="tpill ${lcls}">${lvl}</span>
+      <span class="muted" style="font-size:13px">Venía mejor y ahora muestra señales de deterioro.</span></div>
+      <ul class="reasons sig-neg">${k.signals.map((x, i) => `<li>${esc(x)}<br><small class="muted">${esc(k.plain[i] || "")}</small></li>`).join("")}</ul>
+      ${o.risk_revisions_down ? `<ul class="reasons sig-neg"><li>Analistas bajando previsiones de beneficio<br><small class="muted">Los expertos esperan que gane menos que hace unas semanas.</small></li></ul>` : ""}
+      ${(k.flags || []).length ? `<div class="when-good">${k.flags.map((f) => `<div>${esc(f)}</div>`).join("")}</div>` : ""}
+    </div>
+    ${(o.risk_bad_news || []).length ? `<h2>Qué dicen las noticias</h2><div class="card"><ul class="reasons">${o.risk_bad_news.map((t) => `<li>«${esc(t)}»</li>`).join("")}</ul></div>` : ""}
+    ${targetBlock(o)}
+    <h2>Si la tienes en cartera</h2>
+    <div class="card"><ul class="reasons">
+      <li>Repasa por qué la compraste y si ese motivo sigue siendo cierto. Una caída por una mala noticia del negocio no es lo mismo que una caída de toda la bolsa.</li>
+      <li>Muchos inversores fijan de antemano cuánto están dispuestos a perder y usan una orden <b>stop-loss</b> ${infoBtn("stoploss")} para no decidir en caliente.</li>
+      <li>Evita comprar más solo porque ha bajado: espera a que deje de caer.</li>
+      <li>Estas señales no garantizan que vaya a seguir cayendo; a veces son solo un bache.</li>
+    </ul><small class="muted">Información general, no una recomendación personal.</small></div>
+    <h2>Datos clave</h2>
+    <div class="card kv num">
+      <div><span>Nota de oportunidad ${infoBtn("score")}</span><span>${Math.round(o.score)}/100</span></div>
+      <div><span>Desde máx. 52s ${infoBtn("drawdown")}</span><span class="down">${pct(o.drawdown, 0)}</span></div>
+      <div><span>vs MM200 ${infoBtn("sma200")}</span><span class="${cls(o.vs_sma200)}">${pct(o.vs_sma200)}</span></div>
+      <div><span>RSI 14 ${infoBtn("rsi")}</span><span>${fmt(o.rsi, 0)}</span></div>
+      <div><span>PER ${infoBtn("pe")}</span><span>${fmt(o.pe, 1)}</span></div>
+      <div><span>Consenso ${infoBtn("consensus")}</span><span>${REC[o.recommendation] || esc(o.recommendation) || "—"}</span></div>
+    </div>
+    <div class="actions">
+      ${o.isin ? `${trButton(o.isin)}
+        <div class="btn-row"><button class="btn" data-copy="${esc(o.isin)}">Copiar ISIN · ${esc(o.isin)}</button>${infoBtn("isin")}</div>` : ""}
+      <a class="btn" href="https://finance.yahoo.com/quote/${encodeURIComponent(o.ticker)}" target="_blank" rel="noopener">Ver en Yahoo Finance</a>
+    </div>
+    ${(o.news || []).length ? `<h2>Noticias</h2>${newsList(o.news)}` : ""}
+    <p class="disclaimer">Datos de Yahoo Finance y Google News. Pueden tener retrasos o errores.</p>`);
+}
+
 let currentList = [];
-function bindOpps(container, list) {
-  container.querySelectorAll(".opp").forEach((b) => b.addEventListener("click", () => openDetail(list[+b.dataset.i])));
+function bindOpps(container, list, risk = false) {
+  container.querySelectorAll(".opp").forEach((b) => b.addEventListener("click", () => (risk ? openRiskDetail : openDetail)(list[+b.dataset.i])));
 }
 
 function renderHoy() {
   const r = report, s = r.sentiment;
   const el = $("#tab-hoy");
-  let html = "";
+  let html = modeSeg();
   if (s) {
     html += `<h2>Termómetro del mercado ${infoBtn("sentiment")}</h2><div class="card">
       <div class="gauge"><div class="gauge-value num">${s.value}</div>
@@ -112,27 +227,32 @@ function renderHoy() {
       <div class="gauge-meta muted"><span>S&amp;P &gt; MM200: ${fmt(s.above200, 0)}%</span><span>&gt; MM50: ${fmt(s.above50, 0)}%</span><span>VIX ${fmt(s.vix, 1)}</span></div>
       <div class="muted" style="font-size:12px;margin-top:8px">${esc(s.note)}</div></div>`;
   }
-  const top5 = r.top.slice(0, 5);
-  html += `<h2>Las 5 mejores de hoy ${infoBtn("score")}</h2>`;
-  html += top5.length ? `<div class="list" id="top-list">${top5.map(oppRow).join("")}</div>`
-    : `<div class="card empty">Hoy ninguna empresa supera el umbral mínimo.</div>`;
+  const risk = listMode === "risk";
+  const top5 = (risk ? r.risk_top || [] : r.top).slice(0, 5);
+  html += risk ? `<h2>Empiezan a caer ${infoBtn("risk")}</h2>` : `<h2>Las 5 mejores de hoy ${infoBtn("score")}</h2>`;
+  html += top5.length ? `<div class="list" id="top-list">${top5.map(risk ? riskRow : oppRow).join("")}</div>`
+    : `<div class="card empty">${risk ? "Hoy ninguna empresa muestra señales claras de empezar a caer." : "Hoy ninguna empresa supera el umbral mínimo."}</div>`;
+  if (risk) html += `<p class="disclaimer">${r.risk_count ?? 0} empresas muestran señales de deterioro hoy. Aquí ves las que más señales acumulan. Las que ya se han desplomado no aparecen aquí.</p>`;
   html += `<p class="disclaimer">Analizadas ${r.analyzed} de ${r.universe_size} empresas · ${r.candidates} superan el umbral.
     Esto es un filtro automático según tus criterios, no una recomendación de inversión. Revisa siempre cada empresa antes de decidir.
     <br>Versión de la app: ${APP_VERSION}</p>`;
   el.innerHTML = html;
+  bindModeSeg(el);
   const list = $("#top-list");
-  if (list) bindOpps(list, top5);
+  if (list) bindOpps(list, top5, risk);
 }
 
 function renderMercados() {
   const el = $("#tab-mercados");
-  const list = report.by_market?.[marketSel] || [];
-  el.innerHTML = `<div class="seg">${["US", "ES", "JP"].map((m) => `<button data-m="${m}" class="${m === marketSel ? "active" : ""}">${{ US: "EE. UU.", ES: "España", JP: "Japón" }[m]}</button>`).join("")}</div>
-    <h2>Mejores de ${{ US: "S&P 500 / Nasdaq 100", ES: "IBEX 35", JP: "Nikkei 225" }[marketSel]}</h2>
-    ${list.length ? `<div class="list" id="mk-list">${list.map(oppRow).join("")}</div>` : `<div class="card empty">Sin candidatas hoy.</div>`}`;
-  el.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => { marketSel = b.dataset.m; renderMercados(); }));
+  const risk = listMode === "risk";
+  const list = (risk ? report.risk_by_market : report.by_market)?.[marketSel] || [];
+  el.innerHTML = `${modeSeg()}<div class="seg">${["US", "ES", "JP"].map((m) => `<button data-m="${m}" class="${m === marketSel ? "active" : ""}">${{ US: "EE. UU.", ES: "España", JP: "Japón" }[m]}</button>`).join("")}</div>
+    <h2>${risk ? "Empiezan a caer en" : "Mejores de"} ${{ US: "S&P 500 / Nasdaq 100", ES: "IBEX 35", JP: "Nikkei 225" }[marketSel]}</h2>
+    ${list.length ? `<div class="list" id="mk-list">${list.map(risk ? riskRow : oppRow).join("")}</div>` : `<div class="card empty">${risk ? "Ninguna muestra señales claras de caída hoy." : "Sin candidatas hoy."}</div>`}`;
+  bindModeSeg(el);
+  el.querySelectorAll(".seg:not(.seg-mode) button").forEach((b) => b.addEventListener("click", () => { marketSel = b.dataset.m; renderMercados(); }));
   const l = $("#mk-list");
-  if (l) bindOpps(l, list);
+  if (l) bindOpps(l, list, risk);
 }
 
 function newsList(items) {
@@ -222,6 +342,7 @@ function openDetail(o) {
     <h2>Desglose de la nota ${infoBtn("score")}</h2>
     <div class="card bars">${Object.keys(BLOCK_LABEL).map((k) => `<div class="bar"><div class="bar-top"><span>${BLOCK_LABEL[k]} ${infoBtn(k)}</span><span class="num">${fmt(b[k], 1)} / ${max[k]}</span></div>
       <div class="track"><div class="fill" style="width:${Math.min(100, ((b[k] || 0) / max[k]) * 100)}%"></div></div></div>`).join("")}</div>
+    ${targetBlock(o)}
     <h2>Datos clave</h2>
     <div class="card kv num">
       <div><span>PER ${infoBtn("pe")}</span><span>${fmt(o.pe, 1)}</span></div>

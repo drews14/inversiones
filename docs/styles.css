@@ -244,3 +244,22 @@ body.basic { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 
 .tabbar button svg { display: block; margin-bottom: 1px; }
 .sheet-close { display: grid; place-items: center; }
+
+/* Selector Oportunidades / Riesgo */
+.seg-mode { margin-top: 4px; }
+.seg-mode button.active.risk { color: var(--down); }
+.ring-risk { background: conic-gradient(var(--down) calc(var(--p) * 1%), var(--card-2) 0); }
+.r-alta { background: color-mix(in srgb, var(--down) 18%, transparent); color: var(--down); }
+.r-atencion { background: var(--warn-soft); color: var(--warn); }
+.opp-price small { font-size: 11px; }
+
+/* Precio objetivo */
+.tgt-top { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.tgt-top small { display: block; font-size: 12px; }
+.tgt-top b { display: block; font-size: 18px; }
+.tgt-bar { position: relative; height: 10px; background: var(--card-2); border-radius: 5px; margin: 14px 4px 6px; }
+.tgt-range { position: absolute; top: 0; bottom: 0; background: var(--line); border-radius: 5px; }
+.tgt-mark { position: absolute; top: -4px; width: 4px; height: 18px; border-radius: 2px; transform: translateX(-50%); }
+.tgt-mean { background: var(--up); }
+.tgt-now { background: var(--text); }
+.tgt-legend { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
