@@ -553,13 +553,7 @@ def main():
 
     now = datetime.now(TZ)
     # GitHub Actions lanza en UTC: hay dos crons (verano/invierno) y solo sigue el que cae a las 7h de Madrid.
-    if os.environ.get("GITHUB_EVENT_NAME") == "schedule" and not args.force:
-        if now.hour not in (7, 8):  # 8 por si GitHub llega con retraso
-            print(f"Son las {now:%H:%M} en Madrid: este cron no toca hoy.")
-            return
-        if (OUT / "history" / f"{now:%Y-%m-%d}.json").exists():
-            print("El informe de hoy ya está generado.")
-            return
+    # La comprobación de horario está en el workflow (.github/workflows/informe-diario.yml).
 
     uni = pd.read_csv(ROOT / "data" / "universe.csv")
     if args.limit:
