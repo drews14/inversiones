@@ -7,7 +7,7 @@ USER_NAME="$(id -un)"
 echo "Instalando en $DIR para el usuario $USER_NAME"
 
 sudo apt-get update -qq
-sudo apt-get install -y -qq python3 python3-venv python3-pip git
+sudo apt-get install -y -qq python3 python3-venv python3-pip git curl
 
 cd "$DIR"
 [ -d .venv ] || python3 -m venv .venv

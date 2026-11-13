@@ -1,3 +1,6 @@
--r requirements.txt
+# Librerías del servidor (compatibles con Python 3.8+; pip elige la versión adecuada)
+yfinance>=1.2
+pandas>=2.0
+requests>=2.31
 fastapi>=0.110
 uvicorn[standard]>=0.29
