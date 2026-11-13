@@ -6,7 +6,7 @@ DIR="$(cd "$(dirname "$0")/.." && pwd)"
 USER_NAME="$(id -un)"
 echo "Instalando en $DIR para el usuario $USER_NAME"
 
-sudo apt-get update -qq
+sudo apt-get update -qq || echo "Aviso: algún repositorio externo (p. ej. Google Chrome) no se pudo actualizar; sigo igualmente."
 sudo apt-get install -y -qq python3 python3-venv python3-pip git curl
 
 cd "$DIR"
