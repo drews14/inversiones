@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=11">
+<link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
 <header class="top">
@@ -34,8 +34,12 @@
   <section id="tab-bolsas" class="tab"></section>
   <section id="tab-economia" class="tab"></section>
   <section id="tab-basico" class="tab"></section>
-  <section id="tab-historico" class="tab"></section>
-  <section id="tab-metodo" class="tab"></section>
+  <section id="tab-simulador" class="tab"></section>
+  <section id="tab-mas" class="tab">
+    <div class="seg" id="mas-seg"><button data-sub="historico" class="active">Histórico</button><button data-sub="metodo">Método</button></div>
+    <div id="tab-historico" class="sub active"></div>
+    <div id="tab-metodo" class="sub"></div>
+  </section>
 </main>
 
 <nav class="tabbar">
@@ -43,8 +47,8 @@
   <button data-tab="mercados"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Mercados</button>
   <button data-tab="bolsas"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 8-9"/><path d="M14 6h6v6"/></svg>Bolsas</button>
   <button data-tab="economia"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="3" height="8"/><rect x="10.5" y="8" width="3" height="12"/><rect x="17" y="4" width="3" height="16"/></svg>Economía</button>
-  <button data-tab="historico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Histórico</button>
-  <button data-tab="metodo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h.01"/></svg>Método</button>
+  <button data-tab="simulador" id="tab-btn-sim" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v12H3z"/><path d="M16 13h2"/><path d="M3 7l3-4h12l3 4"/></svg>Simulador</button>
+  <button data-tab="mas"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg>Más</button>
 </nav>
 
 <div id="sheet" class="sheet" hidden>
@@ -63,7 +67,8 @@
   </div>
 </div>
 
-<script src="glossary.js?v=11"></script>
-<script src="app.js?v=11"></script>
+<script src="glossary.js?v=12"></script>
+<script src="app.js?v=12"></script>
+<script src="simulador.js?v=12"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "11";
+const APP_VERSION = "12";
 
 const FLAG = { US: `<span class="mk">US</span>`, ES: `<span class="mk">ES</span>`, JP: `<span class="mk">JP</span>` };
 const BLOCK_LABEL = { valuation: "Valoración", technical: "Sobreventa técnica", quality: "Calidad / fiabilidad", analysts: "Consenso analistas" };
@@ -204,6 +204,7 @@ function openRiskDetail(o) {
     <div class="actions">
       ${o.isin ? `${trButton(o.isin)}
         <div class="btn-row"><button class="btn" data-copy="${esc(o.isin)}">Copiar ISIN · ${esc(o.isin)}</button>${infoBtn("isin")}</div>` : ""}
+      ${window.Sim?.server ? `<button class="btn" data-simbuy="${esc(o.ticker)}">Simular compra o venta</button>` : ""}
       <a class="btn" href="https://finance.yahoo.com/quote/${encodeURIComponent(o.ticker)}" target="_blank" rel="noopener">Ver en Yahoo Finance</a>
     </div>
     ${(o.news || []).length ? `<h2>Noticias</h2>${newsList(o.news)}` : ""}
@@ -358,6 +359,7 @@ function openDetail(o) {
       ${o.isin ? `${trButton(o.isin)}
         <div class="btn-row"><button class="btn" data-copy="${esc(o.isin)}">Copiar ISIN · ${esc(o.isin)}</button>${infoBtn("isin")}</div>
         <a class="btn" href="https://app.traderepublic.com/instrument/${esc(o.isin)}" target="_blank" rel="noopener">Abrir en la web de Trade Republic</a>` : ""}
+      ${window.Sim?.server ? `<button class="btn" data-simbuy="${esc(o.ticker)}">Simular compra o venta</button>` : ""}
       <a class="btn" href="https://finance.yahoo.com/quote/${encodeURIComponent(o.ticker)}" target="_blank" rel="noopener">Ver en Yahoo Finance</a>
     </div>
     ${(o.news || []).length ? `<h2>Noticias</h2>${newsList(o.news)}` : ""}
@@ -627,9 +629,17 @@ function setTab(name, scroll = true) {
   expertTab = name;
   document.querySelectorAll(".tabbar button").forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
   document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.id === `tab-${name}`));
-  if (name === "historico") renderHistorico();
+  if (name === "mas" && masSub === "historico") renderHistorico();
+  if (name === "simulador" && window.Sim) window.Sim.show();
   if (scroll) window.scrollTo(0, 0);
 }
+let masSub = "historico";
+document.querySelectorAll("#mas-seg button").forEach((b) => b.addEventListener("click", () => {
+  masSub = b.dataset.sub;
+  document.querySelectorAll("#mas-seg button").forEach((x) => x.classList.toggle("active", x === b));
+  document.querySelectorAll("#tab-mas .sub").forEach((x) => x.classList.toggle("active", x.id === `tab-${masSub}`));
+  if (masSub === "historico") renderHistorico();
+}))
 document.querySelectorAll(".tabbar button").forEach((b) => b.addEventListener("click", () => setTab(b.dataset.tab)));
 
 function renderAll() {

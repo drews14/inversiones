@@ -263,3 +263,42 @@ body.basic { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .tgt-mean { background: var(--up); }
 .tgt-now { background: var(--text); }
 .tgt-legend { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+
+.sub { display: none; }
+.sub.active { display: block; }
+.tabbar button[hidden] { display: none; }
+
+/* Simulador */
+.form { display: grid; gap: 12px; }
+.form label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.form input, .form select { font: inherit; font-size: 16px; color: var(--text); background: var(--card-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 11px 12px; width: 100%; -webkit-appearance: none; appearance: none; }
+.form input:focus, .form select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.form-error { color: var(--down); margin: 0; font-size: 14px; min-height: 0; }
+.form-error:empty { display: none; }
+.link { color: var(--accent); font-size: 14px; padding: 6px; }
+.link.danger { color: var(--down); }
+.acc-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 8px; margin-top: 4px; scrollbar-width: none; }
+.acc-row::-webkit-scrollbar { display: none; }
+.acc-chip { flex: none; padding: 8px 12px; border-radius: 999px; background: var(--card); box-shadow: var(--shadow); font-size: 14px; font-weight: 600; }
+.acc-chip.active { outline: 2px solid var(--accent); }
+.acc-chip.add { color: var(--accent); }
+.kind { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 6px; margin-left: 4px; vertical-align: 1px; }
+.kind.sim { background: var(--warn-soft); color: var(--warn); }
+.kind.real { background: var(--accent-soft); color: var(--up); }
+.sim-total small { display: block; color: var(--muted); font-size: 13px; }
+.sim-total b { display: block; font-size: 30px; letter-spacing: -.02em; }
+.sim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 10px; font-size: 15px; font-weight: 600; }
+.sim-grid small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.sim-actions { margin: 4px 0 0; display: grid; }
+.sim-foot { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; justify-content: center; margin-top: 20px; font-size: 13px; }
+.live { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 6px; background: var(--card-2); color: var(--muted); vertical-align: 2px; }
+.live.on { background: var(--accent-soft); color: var(--up); }
+.pos .opp-price b { font-size: 15px; }
+.row.trade .link { margin-left: 4px; font-size: 20px; line-height: 1; }
+.invite-code { font-size: 32px; font-weight: 800; letter-spacing: .15em; text-align: center; padding: 18px; background: var(--card); border-radius: 14px; margin: 12px 0; }
+.tq-top b { font-size: 18px; }
+.tq-price { font-size: 24px; font-weight: 700; margin: 6px 0 2px; }
+.seg-small button { font-size: 13px; padding: 6px 0; }
+#t-results:empty { display: none; }
+.form [hidden], label[hidden] { display: none !important; }
