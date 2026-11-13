@@ -122,3 +122,63 @@ def trade(user_id, account_id, ticker, side, qty=None, amount_eur=None, price=No
                   (account_id, ts, ticker, q.get("name"), side, qty, price, q["currency"], fx, fee, note))
     return {"ticker": ticker, "side": side, "qty": qty, "price": price, "currency": q["currency"],
             "eur": cost_eur, "fee_eur": fee}
+
+
+def value_history(user_id, account_id, rng="1mo"):
+    """Valor de la cartera en el tiempo, reconstruido con precios históricos y el cambio de cada día."""
+    import pandas as pd
+    a, trades = get_account(user_id, account_id)
+    if not a:
+        return None
+    if not trades:
+        return {"points": [], "base": a["start_cash"]}
+    tickers = sorted({t["ticker"] for t in trades})
+    curs = {t["ticker"]: t["currency"] for t in trades}
+    pairs = sorted({p for p in (prices.fx_pair(c) for c in curs.values()) if p})
+    raw = prices.history(tickers + pairs, rng)
+    stock_cols = [t for t in tickers if t in raw]
+    # solo momentos en los que cotiza alguna acción de la cartera (no la madrugada de las divisas)
+    df = raw.ffill()[raw[stock_cols].notna().any(axis=1)] if stock_cols else raw.ffill()
+    first = min(t["ts"] for t in trades)
+    margin = pd.Timedelta(0) if rng in ("1d", "5d") else pd.Timedelta(days=1)
+    df = df[df.index >= pd.Timestamp(first, unit="s", tz=df.index.tz) - margin] if len(df) else df
+
+    if df.empty:
+        return {"points": [], "base": a["start_cash"]}
+    rows = sorted(trades, key=lambda t: t["ts"])
+    points, i, cash, qty, invested = [], 0, a["start_cash"], {}, 0.0
+    for ix, row in df.iterrows():
+        ts = ix.timestamp()
+        while i < len(rows) and rows[i]["ts"] <= ts:
+            t = rows[i]
+            eur = t["qty"] * t["price"] / t["fx_eur"]
+            if t["side"] == "buy":
+                qty[t["ticker"]] = qty.get(t["ticker"], 0) + t["qty"]
+                cash -= eur + t["fee_eur"]
+                invested += eur + t["fee_eur"]
+            else:
+                qty[t["ticker"]] = qty.get(t["ticker"], 0) - t["qty"]
+                cash += eur - t["fee_eur"]
+                invested -= eur - t["fee_eur"]
+            i += 1
+        val, ok = 0.0, True
+        for tk, q in qty.items():
+            if q <= 1e-9:
+                continue
+            px = row.get(tk)
+            cur = curs[tk]
+            pair = prices.fx_pair(cur)
+            fx = 1.0 if not pair else row.get(pair)
+            if pd.isna(px) or (pair and pd.isna(fx)):
+                ok = False
+                break
+            fx = fx * 100 if cur == "GBp" else fx
+            val += q * px / fx
+        if not ok:
+            continue
+        total = (cash + val) if a["kind"] == "sim" else val
+        points.append({"t": int(ts), "v": round(total, 2), "inv": round(invested, 2)})
+    now = compute(a, trades)  # último punto: valor en directo
+    points.append({"t": int(time.time()), "v": round(now["total"], 2), "inv": round(now["invested"], 2)})
+    base = a["start_cash"] if a["kind"] == "sim" else None
+    return {"points": points, "base": base}

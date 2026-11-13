@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "12";
+const APP_VERSION = "13";
 
 const FLAG = { US: `<span class="mk">US</span>`, ES: `<span class="mk">ES</span>`, JP: `<span class="mk">JP</span>` };
 const BLOCK_LABEL = { valuation: "Valoración", technical: "Sobreventa técnica", quality: "Calidad / fiabilidad", analysts: "Consenso analistas" };
@@ -454,7 +454,7 @@ $(".sheet-backdrop").addEventListener("touchmove", (e) => e.preventDefault(), { 
   // 2) Resto de la ficha (táctil)
   let armed = false;
   panel.addEventListener("touchstart", (e) => {
-    if (e.target.closest(".sheet-top")) { armed = false; return; }
+    if (e.target.closest(".sheet-top") || e.target.closest(".chart")) { armed = false; return; }
     armed = panel.scrollTop <= 0;
     begin(e.touches[0].clientY);
   }, { passive: true });
@@ -608,16 +608,31 @@ try { mode = localStorage.getItem("modo") || "experto"; } catch {}
 let expertTab = "hoy";
 
 function applyMode() {
+  if (mode === "simulador" && !window.Sim?.server) mode = "experto";
   document.body.classList.toggle("basic", mode === "basico");
+  document.body.classList.toggle("sim", mode === "simulador");
   document.querySelectorAll(".mode button").forEach((b) => b.classList.toggle("active", b.dataset.mode === mode));
+  document.querySelector(".tabbar:not(#sim-tabbar)").hidden = mode !== "experto";
+  document.querySelector("#sim-tabbar").hidden = mode !== "simulador";
   if (mode === "basico") {
     document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.id === "tab-basico"));
     $("#title").textContent = viewingDate ? "Informe anterior" : "Hoy";
+  } else if (mode === "simulador") {
+    document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.id === "tab-simulador"));
+    $("#title").textContent = "Simulador";
+    window.Sim.show();
   } else {
     $("#title").textContent = viewingDate ? "Informe anterior" : "Oportunidades";
     setTab(expertTab, false);
   }
 }
+window.applyMode = applyMode;
+window.setMode = (m) => {
+  mode = m;
+  try { localStorage.setItem("modo", m); } catch {}
+  applyMode();
+};
+window.getMode = () => mode;
 document.querySelectorAll(".mode button").forEach((b) => b.addEventListener("click", () => {
   mode = b.dataset.mode;
   try { localStorage.setItem("modo", mode); } catch {}
@@ -627,10 +642,9 @@ document.querySelectorAll(".mode button").forEach((b) => b.addEventListener("cli
 
 function setTab(name, scroll = true) {
   expertTab = name;
-  document.querySelectorAll(".tabbar button").forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll(".tabbar:not(#sim-tabbar) button").forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
   document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.id === `tab-${name}`));
   if (name === "mas" && masSub === "historico") renderHistorico();
-  if (name === "simulador" && window.Sim) window.Sim.show();
   if (scroll) window.scrollTo(0, 0);
 }
 let masSub = "historico";
@@ -640,7 +654,7 @@ document.querySelectorAll("#mas-seg button").forEach((b) => b.addEventListener("
   document.querySelectorAll("#tab-mas .sub").forEach((x) => x.classList.toggle("active", x.id === `tab-${masSub}`));
   if (masSub === "historico") renderHistorico();
 }))
-document.querySelectorAll(".tabbar button").forEach((b) => b.addEventListener("click", () => setTab(b.dataset.tab)));
+document.querySelectorAll(".tabbar:not(#sim-tabbar) button").forEach((b) => b.addEventListener("click", () => setTab(b.dataset.tab)));
 
 function renderAll() {
   const g = new Date(report.generated_at);

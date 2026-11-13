@@ -100,6 +100,36 @@ def fx_on(cur, ts):
     return rate * 100 if cur == "GBp" else rate
 
 
+# ---------------------------------------------------------------- históricos para gráficas
+RANGES = {  # rango -> (period de Yahoo, intervalo)
+    "1d": ("1d", "5m"), "5d": ("5d", "30m"), "1mo": ("1mo", "1d"), "3mo": ("3mo", "1d"),
+    "6mo": ("6mo", "1d"), "1y": ("1y", "1d"), "5y": ("5y", "1wk"), "max": ("max", "1mo"),
+}
+_hist_cache = {}  # (tickers, rango) -> (momento, DataFrame)
+
+
+def history(tickers, rng="1mo"):
+    """Cierres de varios valores para un rango (caché de 2 min intradía, 30 min diario)."""
+    period, interval = RANGES.get(rng, RANGES["1mo"])
+    key = (tuple(sorted(tickers)), rng)
+    ttl = 120 if interval.endswith("m") else 1800
+    hit = _hist_cache.get(key)
+    if hit and time.time() - hit[0] < ttl:
+        return hit[1]
+    df = yf.download(list(key[0]), period=period, interval=interval, progress=False, auto_adjust=True, threads=True)["Close"]
+    if isinstance(df, pd.Series):
+        df = df.to_frame(key[0][0])
+    df = df.sort_index()
+    _hist_cache[key] = (time.time(), df)
+    return df
+
+
+def series(ticker, rng="1mo"):
+    df = history([ticker], rng)
+    s = df[ticker].dropna() if ticker in df else pd.Series(dtype=float)
+    return [{"t": int(ix.timestamp()), "v": round(float(v), 4)} for ix, v in s.items()]
+
+
 def track(tickers):
     now = time.time()
     with _lock:
@@ -138,13 +168,56 @@ def snapshot(tickers):
         return {t: _with_eur(_cache.get(t)) for t in tickers if _cache.get(t)}
 
 
+# Bolsas principales primero (Yahoo devuelve antes cotizaciones secundarias como .NE, .TI, .HM…)
+MAIN_SUFFIX = ["", ".MC", ".DE", ".PA", ".AS", ".MI", ".L", ".T", ".SW", ".BR", ".LS", ".HK", ".TO"]
+OTC = {"PNK", "OQX", "OQB", "OTC", "OEM"}
+_universe = None
+
+
+def _local_universe():
+    """Las ~780 empresas de los índices que analiza el informe, con su cotización principal."""
+    global _universe
+    if _universe is None:
+        from pathlib import Path
+        path = Path(__file__).resolve().parent.parent / "data" / "universe.csv"
+        try:
+            _universe = pd.read_csv(path)[["ticker", "name", "market", "index"]].fillna("")
+        except Exception:
+            _universe = pd.DataFrame(columns=["ticker", "name", "market", "index"])
+    return _universe
+
+
+def _rank(q):
+    sym = q["symbol"]
+    if q.get("exchange") in OTC:
+        return len(MAIN_SUFFIX) + 1
+    suf = "." + sym.split(".", 1)[1] if "." in sym else ""
+    return MAIN_SUFFIX.index(suf) if suf in MAIN_SUFFIX else len(MAIN_SUFFIX)
+
+
 def search(query):
-    res = []
-    for q in yf.Search(query, max_results=10).quotes:
-        if q.get("quoteType") in ("EQUITY", "ETF") and q.get("symbol"):
-            res.append({"ticker": q["symbol"], "name": " ".join((q.get("shortname") or q.get("longname") or "").split()),
-                        "exchange": q.get("exchDisp") or q.get("exchange"), "type": q.get("quoteType")})
-    return res
+    res, seen = [], set()
+    ql = query.lower().strip()
+    u = _local_universe()
+    if len(u):
+        m = u[u["name"].str.lower().str.contains(ql, regex=False) | (u["ticker"].str.lower() == ql)
+              | u["ticker"].str.lower().str.startswith(ql + ".")]
+        for _, r in m.head(5).iterrows():
+            seen.add(r["ticker"])
+            res.append({"ticker": r["ticker"], "name": r["name"], "exchange": r["index"], "type": "EQUITY"})
+    try:
+        quotes = [q for q in yf.Search(query, max_results=20).quotes
+                  if q.get("quoteType") in ("EQUITY", "ETF") and q.get("symbol")]
+    except Exception:
+        quotes = []
+    quotes.sort(key=_rank)
+    for q in quotes:
+        if q["symbol"] in seen:
+            continue
+        seen.add(q["symbol"])
+        res.append({"ticker": q["symbol"], "name": " ".join((q.get("shortname") or q.get("longname") or "").split()),
+                    "exchange": q.get("exchDisp") or q.get("exchange"), "type": q.get("quoteType")})
+    return res[:12]
 
 
 def _loop():

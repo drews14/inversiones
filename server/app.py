@@ -140,6 +140,16 @@ def quote(ticker: str, u=Depends(current_user)):
     return q
 
 
+@app.get("/api/history/{ticker}")
+def history(ticker: str, range: str = "1mo", u=Depends(current_user)):
+    if range not in prices.RANGES:
+        raise HTTPException(400, "Rango no válido")
+    pts = prices.series(ticker.upper(), range)
+    if not pts:
+        raise HTTPException(404, "Sin datos para ese valor")
+    return {"ticker": ticker.upper(), "range": range, "points": pts}
+
+
 @app.get("/api/stream")
 async def stream(request: Request, tickers: str = "", u=Depends(current_user)):
     """Envía precios cada pocos segundos (Server-Sent Events) para los valores de tus carteras y los que mires."""
@@ -204,6 +214,16 @@ def account_detail(account_id: int, u=Depends(current_user)):
         raise HTTPException(404, "Cartera no encontrada")
     out = portfolio.compute(a, trades)
     out["trades"] = [dict(t) for t in reversed(trades)][:200]
+    return out
+
+
+@app.get("/api/accounts/{account_id}/history")
+def account_history(account_id: int, range: str = "1mo", u=Depends(current_user)):
+    if range not in prices.RANGES:
+        raise HTTPException(400, "Rango no válido")
+    out = portfolio.value_history(u["id"], account_id, range)
+    if out is None:
+        raise HTTPException(404, "Cartera no encontrada")
     return out
 
 
