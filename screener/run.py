@@ -538,7 +538,7 @@ def notify(report):
         lines.append(f"VIX: {vix['value']}")
     headers = {"Title": f"Informe {report['date_label']}: {len(report['top'])} oportunidades"}
     if os.environ.get("APP_URL"):
-        headers["Click"] = os.environ["APP_URL"]
+        headers["Click"] = os.environ["APP_URL"].rstrip("/") + "/#whatsapp"
     requests.post(f"https://ntfy.sh/{topic}", data="\n".join(lines).encode(), headers=headers, timeout=30)
     print("Notificación enviada")
 

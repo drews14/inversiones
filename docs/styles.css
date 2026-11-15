@@ -350,3 +350,8 @@ body.sim .tabbar:not(#sim-tabbar) { display: none; }
 .trade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
 .trade-btns .btn:only-child { grid-column: 1 / -1; }
 .btn.sell { background: color-mix(in srgb, var(--down) 15%, var(--card)); color: var(--down); }
+
+/* Resumen para WhatsApp */
+.wa-btn { width: 100%; margin: 14px 0 4px; font-weight: 600; }
+.wa-preview { white-space: pre-wrap; word-break: break-word; font: 14px/1.45 -apple-system, system-ui, sans-serif;
+  background: var(--card-2); border-radius: 12px; padding: 14px; margin: 14px 0 8px; }

@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "13";
+const APP_VERSION = "14";
 
 const FLAG = { US: `<span class="mk">US</span>`, ES: `<span class="mk">ES</span>`, JP: `<span class="mk">JP</span>` };
 const BLOCK_LABEL = { valuation: "Valoración", technical: "Sobreventa técnica", quality: "Calidad / fiabilidad", analysts: "Consenso analistas" };
@@ -228,6 +228,7 @@ function renderHoy() {
       <div class="gauge-meta muted"><span>S&amp;P &gt; MM200: ${fmt(s.above200, 0)}%</span><span>&gt; MM50: ${fmt(s.above50, 0)}%</span><span>VIX ${fmt(s.vix, 1)}</span></div>
       <div class="muted" style="font-size:12px;margin-top:8px">${esc(s.note)}</div></div>`;
   }
+  html += waButton();
   const risk = listMode === "risk";
   const top5 = (risk ? r.risk_top || [] : r.top).slice(0, 5);
   html += risk ? `<h2>Empiezan a caer ${infoBtn("risk")}</h2>` : `<h2>Las 5 mejores de hoy ${infoBtn("score")}</h2>`;
@@ -364,6 +365,10 @@ function openDetail(o) {
     </div>
     ${(o.news || []).length ? `<h2>Noticias</h2>${newsList(o.news)}` : ""}
     <p class="disclaimer">Datos de Yahoo Finance, FRED y Google News. Pueden tener retrasos o errores.</p>`;
+  openSheetShell();
+}
+
+function openSheetShell() {
   const sh = $("#sheet");
   if (sh.hidden) lockScroll();
   sh.hidden = false;
@@ -371,6 +376,12 @@ function openDetail(o) {
   panel.style.transform = "";
   panel.scrollTop = 0;
 }
+
+// --- Resumen para WhatsApp
+const waButton = () => `<button class="btn wa-btn" data-wa>Enviar resumen del día por WhatsApp</button>`;
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-wa]") && report) WA.open(report);
+});
 
 // --- Bloqueo del fondo: en iOS Safari overflow:hidden no basta, hay que fijar el body
 let savedScrollY = 0;
@@ -562,6 +573,7 @@ function renderBasico() {
     ${bm.lines.map((l) => `<p>${esc(l)}</p>`).join("")}
     ${(r.basic_news || []).length ? `<h4>Titulares del día</h4><ul class="b-news">${r.basic_news.slice(0, 3).map((n) => `<li><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a></li>`).join("")}</ul>` : ""}
   </div>`;
+  html += waButton();
   html += `<h2 class="b-h2">Empresas interesantes hoy</h2>`;
   const list = r.top.slice(0, 5).filter((o) => o.basic);
   if (!list.length) html += `<div class="b-card"><p>Hoy no hay ninguna empresa que destaque claramente.</p></div>`;
@@ -675,6 +687,7 @@ async function openReport(date) {
     viewingDate = date;
     expertTab = "hoy";
     renderAll();
+    if (location.hash === "#whatsapp") { history.replaceState(null, "", location.pathname); WA.open(report); }
   } catch (e) {
     $("#subtitle").textContent = "No se pudo cargar el informe";
   }
