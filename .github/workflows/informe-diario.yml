@@ -1,12 +1,9 @@
 name: Informe diario
 
 on:
-  schedule:
-    # GitHub usa UTC y a veces se salta o retrasa ejecuciones programadas.
-    # Por eso hay varios intentos cada 20 minutos (L-V): el primero que cae entre las 6:30 y las 10:00
-    # de Madrid genera el informe; los demás ven que ya existe y terminan en segundos.
-    - cron: "10,30,50 4-8 * * 1-5"
-  workflow_dispatch: {}       # botón "Run workflow" para lanzarlo a mano
+  # El informe diario lo genera ahora el portátil (deploy/actualizar.sh): la programación de GitHub
+  # nunca llegó a dispararse sola. Aquí queda solo el botón "Run workflow" como respaldo manual.
+  workflow_dispatch: {}
 
 permissions:
   contents: write

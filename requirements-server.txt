@@ -5,3 +5,4 @@ requests>=2.31
 fastapi>=0.110
 uvicorn[standard]>=0.29
 multitasking<0.0.12  # la 0.0.12+ no funciona en Python 3.8
+backports.zoneinfo; python_version < "3.9"  # para el informe diario en Python 3.8

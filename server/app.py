@@ -260,4 +260,9 @@ async def http_error(request: Request, exc: HTTPException):
 
 
 # ---------------------------------------------------------------- web
+# El informe diario lo genera el propio portátil fuera del repositorio (ver deploy/actualizar.sh).
+import os  # noqa: E402
+INFORME_DIR = Path(os.environ.get("INFORME_DIR") or Path.home() / "inversiones-datos" / "informe")
+if INFORME_DIR.is_dir():
+    app.mount("/data", StaticFiles(directory=INFORME_DIR), name="informe")
 app.mount("/", StaticFiles(directory=ROOT / "docs", html=True), name="web")

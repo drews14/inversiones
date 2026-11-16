@@ -14,7 +14,10 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
-from zoneinfo import ZoneInfo
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # Python 3.8 (portátil con Ubuntu 20.04)
+    from backports.zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests
@@ -25,7 +28,8 @@ import config as C  # noqa: E402
 import basic  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "docs" / "data"
+# En el portátil el informe se guarda fuera del repositorio (INFORME_DIR) para que «git pull» no choque con él.
+OUT = Path(os.environ["INFORME_DIR"]) if os.environ.get("INFORME_DIR") else ROOT / "docs" / "data"
 TZ = ZoneInfo("Europe/Madrid")
 
 
@@ -465,7 +469,7 @@ def company_news(r):
 
 
 # ---------------------------------------------------------------- ISIN (para enlazar con el bróker)
-ISIN_CACHE = ROOT / "data" / "isin.json"
+ISIN_CACHE = (OUT.parent / "isin.json") if os.environ.get("INFORME_DIR") else ROOT / "data" / "isin.json"
 ISIN_PREFIX = {"ES": ("ES",), "JP": ("JP",), "US": ("US",)}
 
 
@@ -482,6 +486,8 @@ def isin_ok(code):
 
 
 def load_isin_cache():
+    if not ISIN_CACHE.exists() and (ROOT / "data" / "isin.json").exists():
+        return json.loads((ROOT / "data" / "isin.json").read_text())
     try:
         return json.loads(ISIN_CACHE.read_text())
     except Exception:
