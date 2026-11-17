@@ -355,3 +355,11 @@ body.sim .tabbar:not(#sim-tabbar) { display: none; }
 .wa-btn { width: 100%; margin: 14px 0 4px; font-weight: 600; }
 .wa-preview { white-space: pre-wrap; word-break: break-word; font: 14px/1.45 -apple-system, system-ui, sans-serif;
   background: var(--card-2); border-radius: 12px; padding: 14px; margin: 14px 0 8px; }
+
+/* Explicación de la ganancia de una posición */
+.explain { margin-top: 10px; }
+.explain p { margin: 0 0 10px; line-height: 1.45; }
+.explain .small { font-size: 13px; }
+.explain h4 { margin: 12px 0 6px; font-size: 14px; }
+.explain-trades { list-style: none; padding: 0; margin: 0 0 10px; font-size: 14px; }
+.explain-trades li { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line, rgba(127,127,127,.15)); }

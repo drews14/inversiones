@@ -130,12 +130,18 @@
     recalc();
     if (S.tab === "cartera" && S.detail && !S.scrubbing) {
       const h = document.querySelector("#pf-hero"); if (h) h.outerHTML = heroHtml();
+      const g = document.querySelector("#pf-grid"); if (g) g.outerHTML = gridHtml();
       const l = document.querySelector("#sim-positions"); if (l) { l.outerHTML = positionsHtml(); bindPositions(); }
     }
     document.querySelectorAll("[data-live-q]").forEach((e) => {
       const q = S.quotes[e.dataset.liveQ];
       if (q) e.innerHTML = `${money(q.price, q.currency)} ${q.chg_day != null ? `<span class="${cls(q.chg_day)}">${pct(q.chg_day, 2)}</span>` : ""}`;
     });
+    const ex = document.querySelector("#pos-explain");
+    if (ex && ex.dataset.ticker) {
+      const p = S.detail?.positions.find((x) => x.ticker === ex.dataset.ticker);
+      if (p) ex.innerHTML = explainHtml(p);
+    }
     const tq = document.querySelector("#trade-quote");
     if (tq && tq.dataset.ticker && S.quotes[tq.dataset.ticker]) tq.innerHTML = quoteHtml(S.quotes[tq.dataset.ticker]);
   }
@@ -205,6 +211,17 @@
     return named;
   }
 
+  // Efectivo / en acciones / ganancia: se repinta con cada precio en directo
+  function gridHtml() {
+    const d = S.detail;
+    return `<div class="sim-grid card num" id="pf-grid">
+        ${d.kind === "sim" ? `<div><small>Efectivo</small>${eur(d.cash)}</div>` : `<div><small>Invertido</small>${eur(d.invested)}</div>`}
+        <div><small>En acciones</small>${eur(d.positions_value)}</div>
+        <div><small>Ganancia abierta</small><span class="${cls(d.positions_value - d.invested)}">${signed(d.positions_value - d.invested)}</span></div>
+        <div><small>Ya realizada</small><span class="${cls(d.pnl_realized)}">${signed(d.pnl_realized)}</span></div>
+      </div>`;
+  }
+
   function positionsHtml() {
     const d = S.detail;
     if (!d.positions.length) return `<div class="card empty" id="sim-positions">Todavía no tienes acciones en esta cartera. Ve a <b>Mercado</b> para comprar.</div>`;
@@ -214,7 +231,8 @@
         <div class="opp-main"><div class="opp-head">
           <div style="min-width:0"><div class="opp-tk">${esc(p.ticker)} ${liveBadge(q)}</div>
             <div class="opp-name">${esc(p.name || "")}</div>
-            <div class="opp-name num">${fmt(p.qty, p.qty % 1 ? 4 : 0)} acc. · medio ${money(p.avg_price, p.currency)}</div></div>
+            <div class="opp-name num">${fmt(p.qty, p.qty % 1 ? 4 : 0)} acc. · compradas a ${money(p.avg_price, p.currency)}</div>
+            ${q ? `<div class="opp-name num">ahora ${money(q.price, q.currency)}</div>` : ""}</div>
           <div class="opp-price num"><b>${eur(p.value_eur)}</b><br>
             <span class="${cls(p.pnl_eur)}">${signed(p.pnl_eur)}</span><br>
             <small class="${cls(p.pnl_pct)}">${pct(p.pnl_pct, 2)}</small></div>
@@ -237,12 +255,7 @@
         <div id="pf-chart" class="chart-box"><div class="chart-empty">Cargando…</div></div>
         ${rangeChips(S.range, "data-range", ["1d", "5d", "1mo", "3mo", "1y", "max"])}
       </div>
-      <div class="sim-grid card num">
-        ${d.kind === "sim" ? `<div><small>Efectivo</small>${eur(d.cash)}</div>` : `<div><small>Invertido</small>${eur(d.invested)}</div>`}
-        <div><small>En acciones</small>${eur(d.positions_value)}</div>
-        <div><small>Ganancia abierta</small><span class="${cls(d.positions_value - d.invested)}">${signed(d.positions_value - d.invested)}</span></div>
-        <div><small>Ya realizada</small><span class="${cls(d.pnl_realized)}">${signed(d.pnl_realized)}</span></div>
-      </div>
+      ${gridHtml()}
       ${d.positions.length || d.kind === "sim" ? `<h2>Reparto</h2><div class="card" id="pf-alloc"></div>` : ""}
       <h2>Posiciones</h2>${positionsHtml()}
       <div class="sim-actions"><button class="btn primary" data-open-trade>${d.kind === "sim" ? "Comprar (simulado)" : "Apuntar compra o venta"}</button></div>
@@ -311,6 +324,41 @@
     scope.querySelectorAll("[data-val]").forEach((b) => b.onclick = () => openValue(b.dataset.val, b.dataset.name));
   }
 
+  // ---------------------------------------------------------------- explicación de la ganancia de una posición
+  // Horario de cada bolsa en hora de España (aprox.) para explicar cuándo se mueve el precio
+  function marketHours(ticker) {
+    if (/\.T$/.test(ticker)) return "La bolsa de Japón abre de 1:00 a 7:30 (hora de España). Fuera de ese horario el precio no cambia.";
+    if (/\.(MC|DE|PA|AS|MI|SW|BR|LS)$/.test(ticker)) return "La bolsa europea abre de 9:00 a 17:30. Fuera de ese horario el precio no cambia.";
+    if (/\.L$/.test(ticker)) return "La bolsa de Londres abre de 9:00 a 17:30 (hora de España). Fuera de ese horario el precio no cambia.";
+    return "La bolsa de EE. UU. abre de 15:30 a 22:00 (hora de España). Fuera de ese horario el precio no cambia.";
+  }
+
+  function explainHtml(pos) {
+    const q = pos.quote;
+    if (!q || q.price == null || !q.fx_eur) return "";
+    const foreign = pos.currency !== "EUR";
+    const byPrice = pos.qty * (q.price - pos.avg_price) / q.fx_eur;   // lo que ha hecho la acción
+    const byFx = pos.cost_local / q.fx_eur - pos.cost_eur;             // lo que ha hecho el euro frente a su moneda
+    const up = q.price >= pos.avg_price;
+    const trades = (S.detail?.trades || []).filter((t) => t.ticker === pos.ticker).slice(0, 6);
+    const when = (ts) => new Date(ts * 1000).toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    return `<div class="card explain">
+      <p>Compraste a <b class="num">${money(pos.avg_price, pos.currency)}</b> por acción${trades.length > 1 ? " (precio medio)" : ""}
+        y ahora está a <b class="num">${money(q.price, q.currency)}</b>: ha ${up ? "subido" : "bajado"} un
+        <b class="num ${cls(q.price - pos.avg_price)}">${pct(Math.abs(q.price / pos.avg_price - 1), 2).replace(/^[+-]/, "")}</b> desde tu compra.</p>
+      ${foreign ? `<div class="kv num">
+        <div><span>Por el precio de la acción</span><span class="${cls(byPrice)}">${signed(byPrice)}</span></div>
+        <div><span>Por el cambio euro / ${esc(pos.currency)}</span><span class="${cls(byFx)}">${signed(byFx)}</span></div>
+        <div><span><b>Ganancia total</b></span><span class="${cls(pos.pnl_eur)}"><b>${signed(pos.pnl_eur)}</b></span></div></div>
+        <p class="muted small">Como la acción cotiza en ${esc(pos.currency)}, tu ganancia en euros también depende del cambio de moneda:
+        si el euro baja frente al ${esc(pos.currency)}, ganas algo aunque la acción no se mueva, y al revés.</p>` : ""}
+      ${trades.length ? `<h4>Tus operaciones</h4><ul class="explain-trades num">${trades.map((t) =>
+        `<li><span>${t.side === "buy" ? "Compra" : "Venta"} · ${when(t.ts)}</span><span>${fmt(t.qty, t.qty % 1 ? 4 : 0)} × ${money(t.price, t.currency)}</span></li>`).join("")}</ul>` : ""}
+      <p class="muted small">${q.realtime ? "Precio en directo: se actualiza cada 5 segundos mientras la bolsa está abierta." : "Precio con unos 15 minutos de retraso (lo da así la bolsa gratis); se actualiza cada 30 segundos."}
+        ${marketHours(pos.ticker)} La comisión de ${eur(S.detail?.fee_eur ?? 1)} por operación se descuenta del efectivo, no de esta ganancia.</p>
+    </div>`;
+  }
+
   // ---------------------------------------------------------------- ficha de un valor (gráfica + comprar/vender)
   async function openValue(ticker, name) {
     if (!S.watch.includes(ticker)) { S.watch.push(ticker); startStream(); }
@@ -323,7 +371,8 @@
         ${rangeChips(S.valueRange, "data-vrange", ["1d", "5d", "1mo", "1y", "5y"])}</div>
       ${pos ? `<h2>Tu posición en «${esc(S.detail.name)}»</h2><div class="card sim-grid num" style="margin:0">
         <div><small>Acciones</small>${fmt(pos.qty, pos.qty % 1 ? 4 : 0)}</div><div><small>Precio medio</small>${money(pos.avg_price, pos.currency)}</div>
-        <div><small>Valor</small>${eur(pos.value_eur)}</div><div><small>Ganancia</small><span class="${cls(pos.pnl_eur)}">${signed(pos.pnl_eur)} (${pct(pos.pnl_pct, 1)})</span></div></div>` : ""}
+        <div><small>Valor</small>${eur(pos.value_eur)}</div><div><small>Ganancia</small><span class="${cls(pos.pnl_eur)}">${signed(pos.pnl_eur)} (${pct(pos.pnl_pct, 1)})</span></div></div>
+        <div id="pos-explain" data-ticker="${esc(ticker)}">${explainHtml(pos)}</div>` : ""}
       ${fromReport ? `<h2>En el informe de hoy</h2><div class="card kv num">
         <div><span>Nota de oportunidad</span><span>${Math.round(fromReport.score)}/100</span></div>
         ${fromReport.timing ? `<div><span>Momento de entrada</span><span>${({ giro: "Señal de giro", vigilar: "Vigilar", esperar: "Esperar" })[fromReport.timing.label]}</span></div>` : ""}

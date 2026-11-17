@@ -1,5 +1,5 @@
 // Caché sencilla: la app funciona sin conexión mostrando el último informe descargado.
-const CACHE = "oportunidades-v14";
+const CACHE = "oportunidades-v15";
 const SHELL = ["./", "index.html", "styles.css", "app.js", "glossary.js", "whatsapp.js", "charts.js", "simulador.js", "manifest.webmanifest", "icon-192.png"];
 self.addEventListener("install", (e) => e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener("activate", (e) => e.waitUntil(
