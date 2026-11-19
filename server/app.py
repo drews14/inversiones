@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import db, portfolio, prices
+from . import db, portfolio, prices, risk
 
 ROOT = Path(__file__).resolve().parent.parent
 app = FastAPI(title="Oportunidades", docs_url=None, redoc_url=None, openapi_url=None)
@@ -79,7 +79,7 @@ class Register(Login):
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "server": True}
+    return {"ok": True, "server": True, "prices": prices.status()}
 
 
 @app.post("/api/login")
@@ -180,6 +180,7 @@ class NewTrade(BaseModel):
     qty: Optional[float] = Field(default=None, gt=0)
     amount_eur: Optional[float] = Field(default=None, gt=0)
     price: Optional[float] = Field(default=None, gt=0)   # solo carteras reales
+    avg_eur: Optional[float] = Field(default=None, gt=0)  # solo reales: «ya la tengo», precio medio en € con comisión
     date: Optional[str] = None                           # solo carteras reales, AAAA-MM-DD
     note: Optional[str] = Field(default=None, max_length=200)
 
@@ -227,6 +228,14 @@ def account_history(account_id: int, range: str = "1mo", u=Depends(current_user)
     return out
 
 
+@app.get("/api/accounts/{account_id}/risk")
+def account_risk(account_id: int, u=Depends(current_user)):
+    a, trades = portfolio.get_account(u["id"], account_id)
+    if not a:
+        raise HTTPException(404, "Cartera no encontrada")
+    return risk.portfolio_risk(portfolio.compute(a, trades)["positions"]) or {}
+
+
 @app.post("/api/accounts/{account_id}/trades")
 def add_trade(account_id: int, body: NewTrade, u=Depends(current_user)):
     ts = None
@@ -237,7 +246,7 @@ def add_trade(account_id: int, body: NewTrade, u=Depends(current_user)):
             raise HTTPException(400, "Fecha no válida")
     try:
         return portfolio.trade(u["id"], account_id, body.ticker.upper(), body.side, body.qty, body.amount_eur,
-                               body.price, ts, body.note)
+                               body.price, ts, body.note, avg_eur=body.avg_eur)
     except ValueError as e:
         raise HTTPException(400, str(e))
 

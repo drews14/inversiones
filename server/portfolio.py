@@ -20,14 +20,15 @@ def compute(account, trades, live=True):
                                          "cost_local": 0.0, "currency": t["currency"]})
         fees += t["fee_eur"]
         if t["side"] == "buy":
+            # como Trade Republic: la comisión de compra va dentro del precio medio
             p["qty"] += t["qty"]
-            p["cost_eur"] += eur
-            p["cost_local"] += t["qty"] * t["price"]
+            p["cost_eur"] += eur + t["fee_eur"]
+            p["cost_local"] += t["qty"] * t["price"] + t["fee_eur"] * t["fx_eur"]
             cash -= eur + t["fee_eur"]
         else:
             avg_eur = p["cost_eur"] / p["qty"] if p["qty"] else 0
             avg_loc = p["cost_local"] / p["qty"] if p["qty"] else 0
-            realized += eur - avg_eur * t["qty"]
+            realized += eur - t["fee_eur"] - avg_eur * t["qty"]
             p["qty"] -= t["qty"]
             p["cost_eur"] -= avg_eur * t["qty"]
             p["cost_local"] -= avg_loc * t["qty"]
@@ -35,7 +36,7 @@ def compute(account, trades, live=True):
     positions = [p for p in pos.values() if p["qty"] > 1e-9]
     if live:
         prices.track([p["ticker"] for p in positions])
-    invested = value = 0.0
+    invested = value = day = 0.0
     for p in positions:
         q = prices.get(p["ticker"], wait=live) if live else None
         p["avg_price"] = p["cost_local"] / p["qty"]
@@ -46,9 +47,11 @@ def compute(account, trades, live=True):
             p["pnl_pct"] = p["pnl_eur"] / p["cost_eur"] if p["cost_eur"] else None
             # parte de la ganancia/pérdida que viene solo del precio en su moneda (sin efecto divisa)
             p["pnl_local_pct"] = q["price"] / p["avg_price"] - 1 if p["avg_price"] else None
+            p["day_eur"] = p["qty"] * (q["price"] - q["prev_close"]) / q["fx_eur"] if q.get("prev_close") else None
         else:
             p["value_eur"] = p["cost_eur"]
-            p["pnl_eur"] = p["pnl_pct"] = p["pnl_local_pct"] = None
+            p["pnl_eur"] = p["pnl_pct"] = p["pnl_local_pct"] = p["day_eur"] = None
+        day += p["day_eur"] or 0
         invested += p["cost_eur"]
         value += p["value_eur"]
     positions.sort(key=lambda p: -p["value_eur"])
@@ -60,9 +63,10 @@ def compute(account, trades, live=True):
         "cash": cash if account["kind"] == "sim" else None,
         "invested": invested, "positions_value": value, "total": total,
         "pnl_open": value - invested, "pnl_realized": realized, "fees": fees,
-        "pnl_total": (total - base) if account["kind"] == "sim" else (value - invested + realized - fees),
+        "pnl_total": (total - base) if account["kind"] == "sim" else (value - invested + realized),
         "pnl_total_pct": ((total - base) / base) if (account["kind"] == "sim" and base) else
-                         (((value - invested + realized - fees) / invested) if invested else None),
+                         (((value - invested + realized) / invested) if invested else None),
+        "day_eur": day, "day_pct": day / (value - day) if value - day else None,
         "positions": positions,
         "n_trades": len(trades),
     }
@@ -82,12 +86,19 @@ def get_account(user_id, account_id):
         return a, _trades(c, account_id)
 
 
-def trade(user_id, account_id, ticker, side, qty=None, amount_eur=None, price=None, ts=None, note=None):
+def trade(user_id, account_id, ticker, side, qty=None, amount_eur=None, price=None, ts=None, note=None, avg_eur=None):
     """Registra una operación. En carteras ficticias el precio es siempre el de mercado."""
     a, trades = get_account(user_id, account_id)
     if not a:
         raise ValueError("Cartera no encontrada")
-    q = prices.get(ticker)
+    if avg_eur and a["kind"] == "real":
+        return _add_position(a, account_id, ticker, qty, avg_eur, ts, note)
+    if a["kind"] == "sim" or price is None:
+        q = prices.fresh(ticker)   # simulador: siempre el precio recién descargado, nunca uno guardado
+        if not q:
+            raise ValueError("Ahora mismo no consigo el precio actual de ese valor. Prueba en un minuto.")
+    else:
+        q = prices.get(ticker)
     if not q:
         raise ValueError("No encuentro cotización para ese valor")
     fx = q["fx_eur"]
@@ -122,6 +133,26 @@ def trade(user_id, account_id, ticker, side, qty=None, amount_eur=None, price=No
                   (account_id, ts, ticker, q.get("name"), side, qty, price, q["currency"], fx, fee, note))
     return {"ticker": ticker, "side": side, "qty": qty, "price": price, "currency": q["currency"],
             "eur": cost_eur, "fee_eur": fee}
+
+
+def _add_position(a, account_id, ticker, qty, avg_eur, ts, note):
+    """«Ya la tengo»: apunta una posición con el precio medio en euros que enseña el bróker (comisión incluida).
+    Se guarda como una compra al cambio de ese día, sin comisión aparte, para que el coste en € sea exacto."""
+    if not qty or qty <= 0:
+        raise ValueError("Indica cuántas acciones tienes")
+    q = prices.get(ticker)
+    if not q or not q.get("fx_eur"):
+        raise ValueError("No encuentro cotización para ese valor")
+    ts = ts or time.time()
+    fx = (prices.fx_on(q["currency"], ts) if ts < time.time() - 86400 else None) or q["fx_eur"]
+    qty = round(float(qty), 6)
+    with db.conn() as c:
+        c.execute("""INSERT INTO trades (account_id, ts, ticker, name, side, qty, price, currency, fx_eur, fee_eur, note)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+                  (account_id, ts, ticker, q.get("name"), "buy", qty, avg_eur * fx, q["currency"], fx, 0.0,
+                   note or "Posición apuntada con su precio medio"))
+    return {"ticker": ticker, "side": "buy", "qty": qty, "price": avg_eur * fx, "currency": q["currency"],
+            "eur": qty * avg_eur, "fee_eur": 0.0}
 
 
 def value_history(user_id, account_id, rng="1mo"):

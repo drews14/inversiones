@@ -1,0 +1,182 @@
+{
+ "_nota": "Catálogo de activos (de la app «Mi cartera»): símbolo en euros, tipo, y qué hay dentro de cada fondo (aprox., nov 2026). Sin datos de usuarios.",
+ "activos": [
+  {
+   "isin": "US67066G1040",
+   "ticker": "NVDA",
+   "yahoo_symbol": "NVD.DE",
+   "nombre": "NVIDIA",
+   "tipo_activo": "Acción",
+   "sector": "Semiconductores / IA",
+   "pais": "EE. UU.",
+   "divisa": "USD",
+   "volatilidad": 50,
+   "beta": 2.2,
+   "emisores": {
+    "NVIDIA": 1
+   },
+   "sectores": {
+    "Tecnología": 1
+   }
+  },
+  {
+   "isin": "ES0105251005",
+   "ticker": "HOME",
+   "yahoo_symbol": "HOME.MC",
+   "nombre": "Neinor Homes",
+   "tipo_activo": "Acción",
+   "sector": "Inmobiliario residencial",
+   "pais": "España",
+   "divisa": "EUR",
+   "volatilidad": 25,
+   "beta": 0.3,
+   "emisores": {
+    "Neinor Homes": 1
+   },
+   "sectores": {
+    "Inmobiliario": 1
+   }
+  },
+  {
+   "isin": "IE00BYTRRD19",
+   "ticker": "WTCH",
+   "yahoo_symbol": "WTCH.AS",
+   "nombre": "SPDR MSCI World Technology",
+   "tipo_activo": "ETF",
+   "sector": "Tecnología (ETF)",
+   "pais": "Global (mayoría EE. UU.)",
+   "divisa": "USD",
+   "volatilidad": 21,
+   "beta": 1.2,
+   "emisores": {
+    "NVIDIA": 0.2,
+    "Apple": 0.18,
+    "Microsoft": 0.15
+   },
+   "sectores": {
+    "Tecnología": 1
+   }
+  },
+  {
+   "isin": "IE00B4L5Y983",
+   "ticker": "EUNL",
+   "yahoo_symbol": "EUNL.DE",
+   "nombre": "iShares Core MSCI World",
+   "tipo_activo": "ETF",
+   "sector": "Global diversificado (ETF)",
+   "pais": "Global (mayoría EE. UU.)",
+   "divisa": "USD",
+   "volatilidad": 14,
+   "beta": 1.0,
+   "emisores": {
+    "NVIDIA": 0.055,
+    "Apple": 0.045,
+    "Microsoft": 0.04
+   },
+   "sectores": {
+    "Tecnología": 0.27,
+    "Financiero": 0.16,
+    "Consumo": 0.18,
+    "Industria": 0.11,
+    "Salud": 0.1,
+    "Otros": 0.18
+   }
+  },
+  {
+   "isin": "IE00BKM4GZ66",
+   "ticker": "IS3N",
+   "yahoo_symbol": "IS3N.DE",
+   "nombre": "iShares Core MSCI EM IMI",
+   "tipo_activo": "ETF",
+   "sector": "Emergentes (ETF)",
+   "pais": "Emergentes (Asia sobre todo)",
+   "divisa": "USD",
+   "volatilidad": 16,
+   "beta": 0.85,
+   "emisores": {
+    "TSMC": 0.116,
+    "Samsung": 0.053
+   },
+   "sectores": {
+    "Tecnología": 0.25,
+    "Financiero": 0.22,
+    "Consumo": 0.2,
+    "Otros": 0.33
+   }
+  },
+  {
+   "isin": "IE000OJ5TQP4",
+   "ticker": "ASWC",
+   "yahoo_symbol": "ASWC.DE",
+   "nombre": "HANetf Future of Defence",
+   "tipo_activo": "ETF",
+   "sector": "Defensa (ETF)",
+   "pais": "EE. UU. y Europa",
+   "divisa": "USD",
+   "volatilidad": 22,
+   "beta": 0.8,
+   "emisores": {
+    "Rheinmetall": 0.08
+   },
+   "sectores": {
+    "Defensa": 1
+   }
+  },
+  {
+   "isin": "IE00B4NCWG09",
+   "ticker": "PPFD",
+   "yahoo_symbol": "PPFD.DE",
+   "nombre": "iShares Physical Silver",
+   "tipo_activo": "ETC",
+   "sector": "Metales preciosos (ETC)",
+   "pais": "Materias primas",
+   "divisa": "USD",
+   "volatilidad": 35,
+   "beta": 0.5,
+   "emisores": {
+    "Plata": 1
+   },
+   "sectores": {
+    "Metales preciosos": 1
+   }
+  },
+  {
+   "isin": "LU2023678449",
+   "ticker": "MILL",
+   "yahoo_symbol": "MILL.PA",
+   "nombre": "Amundi MSCI Millennials (antes Global Sport & eSport)",
+   "tipo_activo": "ETF",
+   "sector": "Consumo millennials (ETF)",
+   "pais": "Global (mayoría EE. UU.)",
+   "divisa": "USD",
+   "volatilidad": 15,
+   "beta": 1.0,
+   "emisores": {
+    "Booking": 0.035
+   },
+   "sectores": {
+    "Consumo": 0.5,
+    "Tecnología": 0.2,
+    "Financiero": 0.3
+   }
+  },
+  {
+   "isin": "IE00B4ND3602",
+   "ticker": "PPFB",
+   "yahoo_symbol": "PPFB.DE",
+   "nombre": "iShares Physical Gold",
+   "tipo_activo": "ETC",
+   "sector": "Metales preciosos (ETC)",
+   "pais": "Materias primas",
+   "divisa": "USD",
+   "volatilidad": 16,
+   "beta": 0.15,
+   "emisores": {
+    "Oro": 1
+   },
+   "sectores": {
+    "Metales preciosos": 1
+   }
+  }
+ ]
+}

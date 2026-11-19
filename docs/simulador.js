@@ -97,12 +97,21 @@
     else if (document.visibilityState === "visible" && S.me && window.getMode?.() === "simulador") startStream();
   });
 
-  const liveBadge = (q) => (!q ? "" : q.realtime ? `<span class="live on">En directo</span>` : `<span class="live">~15 min</span>`);
+  // Estado del precio: en directo, con retraso, bolsa cerrada o sin actualizar (Yahoo no responde)
+  const liveBadge = (q) => {
+    if (!q) return "";
+    if (q.stale_min != null && q.stale_min >= 3) return `<span class="live warn">Sin actualizar ${q.stale_min} min</span>`;
+    if (q.age_min != null && q.age_min > 45) {
+      const t = new Date(q.ts).toLocaleString("es-ES", { weekday: q.age_min > 1200 ? "short" : undefined, hour: "2-digit", minute: "2-digit" });
+      return `<span class="live">Cerrado · ${esc(t)}</span>`;
+    }
+    return q.realtime ? `<span class="live on">En directo</span>` : `<span class="live">~15 min</span>`;
+  };
 
   function recalc() {
     const d = S.detail;
     if (!d) return;
-    let value = 0;
+    let value = 0, day = 0;
     for (const p of d.positions) {
       const q = S.quotes[p.ticker];
       if (q && q.price_eur != null) {
@@ -110,17 +119,21 @@
         p.value_eur = p.qty * q.price_eur;
         p.pnl_eur = p.value_eur - p.cost_eur;
         p.pnl_pct = p.cost_eur ? p.pnl_eur / p.cost_eur : null;
+        p.day_eur = q.prev_close ? p.qty * (q.price - q.prev_close) / q.fx_eur : null;
       }
       value += p.value_eur || 0;
+      day += p.day_eur || 0;
     }
     d.positions_value = value;
+    d.day_eur = day;
+    d.day_pct = value - day ? day / (value - day) : null;
     if (d.kind === "sim") {
       d.total = d.cash + value;
       d.pnl_total = d.total - d.start_cash;
       d.pnl_total_pct = d.start_cash ? d.pnl_total / d.start_cash : null;
     } else {
       d.total = value;
-      d.pnl_total = value - d.invested + d.pnl_realized - d.fees;
+      d.pnl_total = value - d.invested + d.pnl_realized;
       d.pnl_total_pct = d.invested ? d.pnl_total / d.invested : null;
     }
   }
@@ -188,7 +201,8 @@
       when = new Date(scrub.t * 1000).toLocaleString("es-ES", { day: "numeric", month: "short", year: S.range === "5y" || S.range === "max" ? "numeric" : undefined, hour: S.range === "1d" || S.range === "5d" ? "2-digit" : undefined, minute: S.range === "1d" || S.range === "5d" ? "2-digit" : undefined });
     }
     return `<div class="hero" id="pf-hero"><small>${esc(when)}</small><b class="num">${eur(val)}</b>
-      <span class="num ${cls(pnl)}">${signed(pnl)} (${pct(pp, 2)}) <span class="muted">${scrub ? "" : "total"}</span></span></div>`;
+      <span class="num ${cls(pnl)}">${signed(pnl)} (${pct(pp, 2)}) <span class="muted">${scrub ? "" : "total"}</span></span>
+      ${!scrub && d.positions.length && d.day_eur != null ? `<span class="num ${cls(d.day_eur)}">${signed(d.day_eur)} (${pct(d.day_pct, 2)}) <span class="muted">hoy</span></span>` : ""}</div>`;
   }
 
   function rangeChips(cur, attr, list) {
@@ -220,6 +234,39 @@
         <div><small>Ganancia abierta</small><span class="${cls(d.positions_value - d.invested)}">${signed(d.positions_value - d.invested)}</span></div>
         <div><small>Ya realizada</small><span class="${cls(d.pnl_realized)}">${signed(d.pnl_realized)}</span></div>
       </div>`;
+  }
+
+  // ---------------------------------------------------------------- riesgo de la cartera (idea del módulo «Mi cartera»)
+  // 5 niveles: Bueno, Moderado, Medio, Alto, Severo. Se recalcula al cambiar de cartera o cada 10 min.
+  const RISK_CLS = ["r-0", "r-1", "r-2", "r-3", "r-4"];
+  async function loadRisk(force) {
+    const d = S.detail;
+    if (!d || !d.positions.length) return;
+    const key = `${d.id}:${d.n_trades}`;
+    if (!force && S.risk && S.riskKey === key && Date.now() - S.riskAt < 600000) return paintRisk();
+    try {
+      S.risk = await api(`accounts/${d.id}/risk`);
+      S.riskKey = key; S.riskAt = Date.now();
+    } catch { S.risk = null; }
+    paintRisk();
+  }
+  function paintRisk() {
+    const e = document.querySelector("#pf-risk"); if (e) e.innerHTML = riskHtml();
+  }
+  function riskHtml() {
+    const r = S.risk;
+    if (!r || S.riskKey !== `${S.detail?.id}:${S.detail?.n_trades}`) return `<div class="card muted">Calculando el riesgo…</div>`;
+    if (!r.items) return "";
+    return `<div class="card risk-card">
+      <div class="risk-global"><span>Riesgo global</span><span class="rlevel ${RISK_CLS[r.global.nivel]}">${esc(r.global.name)}</span></div>
+      ${r.items.map((i) => `<details class="risk-item"><summary>
+          <span class="ri-label">${esc(i.label)}</span><span class="ri-val num">${esc(i.value)}</span><span class="rlevel ${RISK_CLS[i.nivel]}">${esc(i.nivel_name)}</span></summary>
+          <p>${esc(i.text)}</p>
+          ${i.top ? `<ul class="ri-top num">${i.top.map((t) => `<li><span>${esc(t.n)}</span><span>${fmt(t.v, 1)} %</span></li>`).join("")}</ul>` : ""}
+        </details>`).join("")}
+      <p class="muted small">Calculado sobre el dinero invertido (no el efectivo). Mira también dentro de los fondos conocidos: si tienes NVIDIA y un ETF que también lleva NVIDIA, lo suma.
+        ${r.estimated?.length ? `Sin datos suficientes de ${esc(r.estimated.join(", "))}: se usa una estimación.` : ""}</p>
+    </div>`;
   }
 
   function positionsHtml() {
@@ -257,6 +304,7 @@
       </div>
       ${gridHtml()}
       ${d.positions.length || d.kind === "sim" ? `<h2>Reparto</h2><div class="card" id="pf-alloc"></div>` : ""}
+      ${d.positions.length ? `<h2>Riesgo de tu cartera</h2><div id="pf-risk">${riskHtml()}</div>` : ""}
       <h2>Posiciones</h2>${positionsHtml()}
       <div class="sim-actions"><button class="btn primary" data-open-trade>${d.kind === "sim" ? "Comprar (simulado)" : "Apuntar compra o venta"}</button></div>
       <p class="disclaimer">${d.kind === "sim" ? `Cartera ficticia: empezaste con ${eur(d.start_cash, 0)} de mentira · comisión ${eur(d.fee_eur)} por operación.` : "Cartera real: registro de tus operaciones; la app no mueve dinero."}</p>`;
@@ -333,6 +381,20 @@
     return "La bolsa de EE. UU. abre de 15:30 a 22:00 (hora de España). Fuera de ese horario el precio no cambia.";
   }
 
+  function profileHtml(pos) {
+    const pr = S.risk?.profiles?.[pos.ticker], q = pos.quote;
+    if (!pr || !q) return "";
+    const lines = [];
+    if (pr.low52 && pr.high52) {
+      const where = (q.price - pr.low52) / (pr.high52 - pr.low52);
+      lines.push(`<div><span>Rango del último año</span><span>${money(pr.low52, q.currency)} – ${money(pr.high52, q.currency)}</span></div>`);
+      if (q.price <= pr.low52 * 1.03) lines.push(`<div><span>Aviso</span><span class="down">Cerca de su mínimo del año</span></div>`);
+      else if (where >= 0.95) lines.push(`<div><span>Aviso</span><span>Cerca de su máximo del año</span></div>`);
+    }
+    if (pr.target) lines.push(`<div><span>Objetivo analistas${pr.analysts ? ` (${pr.analysts})` : ""}</span><span>${money(pr.target, q.currency)} <span class="${cls(pr.target - q.price)}">${pct(pr.target / q.price - 1, 0)}</span></span></div>`);
+    return lines.length ? `<div class="kv num" style="margin-bottom:10px">${lines.join("")}</div>` : "";
+  }
+
   function explainHtml(pos) {
     const q = pos.quote;
     if (!q || q.price == null || !q.fx_eur) return "";
@@ -343,7 +405,7 @@
     const trades = (S.detail?.trades || []).filter((t) => t.ticker === pos.ticker).slice(0, 6);
     const when = (ts) => new Date(ts * 1000).toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
     return `<div class="card explain">
-      <p>Compraste a <b class="num">${money(pos.avg_price, pos.currency)}</b> por acción${trades.length > 1 ? " (precio medio)" : ""}
+      <p>Compraste a <b class="num">${money(pos.avg_price, pos.currency)}</b> por acción (precio medio con comisión)
         y ahora está a <b class="num">${money(q.price, q.currency)}</b>: ha ${up ? "subido" : "bajado"} un
         <b class="num ${cls(q.price - pos.avg_price)}">${pct(Math.abs(q.price / pos.avg_price - 1), 2).replace(/^[+-]/, "")}</b> desde tu compra.</p>
       ${foreign ? `<div class="kv num">
@@ -352,10 +414,11 @@
         <div><span><b>Ganancia total</b></span><span class="${cls(pos.pnl_eur)}"><b>${signed(pos.pnl_eur)}</b></span></div></div>
         <p class="muted small">Como la acción cotiza en ${esc(pos.currency)}, tu ganancia en euros también depende del cambio de moneda:
         si el euro baja frente al ${esc(pos.currency)}, ganas algo aunque la acción no se mueva, y al revés.</p>` : ""}
+      ${profileHtml(pos)}
       ${trades.length ? `<h4>Tus operaciones</h4><ul class="explain-trades num">${trades.map((t) =>
         `<li><span>${t.side === "buy" ? "Compra" : "Venta"} · ${when(t.ts)}</span><span>${fmt(t.qty, t.qty % 1 ? 4 : 0)} × ${money(t.price, t.currency)}</span></li>`).join("")}</ul>` : ""}
       <p class="muted small">${q.realtime ? "Precio en directo: se actualiza cada 5 segundos mientras la bolsa está abierta." : "Precio con unos 15 minutos de retraso (lo da así la bolsa gratis); se actualiza cada 30 segundos."}
-        ${marketHours(pos.ticker)} La comisión de ${eur(S.detail?.fee_eur ?? 1)} por operación se descuenta del efectivo, no de esta ganancia.</p>
+        ${marketHours(pos.ticker)} Como en Trade Republic, la comisión de compra (${eur(S.detail?.fee_eur ?? 1)}) va incluida en tu precio medio.</p>
     </div>`;
   }
 
@@ -439,11 +502,13 @@
       <div class="card" id="trade-quote" data-ticker="${esc(ticker)}"><span class="muted">Cargando precio…</span></div>
       <form class="form" id="trade-form">
         <div class="seg"><button type="button" data-side="buy" class="${side === "buy" ? "active" : ""}">Comprar</button><button type="button" data-side="sell" class="${side === "sell" ? "active" : ""}">Vender</button></div>
-        <div class="seg seg-small"><button type="button" data-how="eur" class="active">Importe en €</button><button type="button" data-how="qty">Nº de acciones</button></div>
+        <div class="seg seg-small"><button type="button" data-how="eur" class="active">Importe en €</button><button type="button" data-how="qty">Nº de acciones</button>${real ? `<button type="button" data-how="have">Ya la tengo</button>` : ""}</div>
+        ${real ? `<p class="muted small" id="f-have-help" hidden>Copia de Trade Republic las acciones que tienes y tu <b>precio medio de compra</b> (en euros, ya incluye la comisión). No hace falta apuntar cada compra.</p>
+          <label id="f-avg" hidden>Precio medio de compra (€)<input name="avg" type="text" inputmode="decimal" pattern="[0-9]+([.,][0-9]+)?" autocomplete="off" placeholder="Ej.: 141,25"></label>` : ""}
         <label id="f-amount">Importe (€)<input name="amount" type="number" min="0" step="any" inputmode="decimal" placeholder="Ej.: 500"></label>
         <label id="f-qty" hidden>Acciones${pos ? ` (tienes ${fmt(pos.qty, pos.qty % 1 ? 4 : 0)})` : ""}<input name="qty" type="number" min="0" step="any" inputmode="decimal" placeholder="Ej.: 3"></label>
         ${pos ? `<button type="button" class="link" id="sell-all" ${side === "sell" ? "" : "hidden"}>Vender todo</button>` : ""}
-        ${real ? `<label>Precio al que operaste (en su moneda, vacío = precio actual)<input name="price" type="number" min="0" step="any" inputmode="decimal"></label>
+        ${real ? `<label id="f-price">Precio al que operaste (en su moneda, vacío = precio actual)<input name="price" type="number" min="0" step="any" inputmode="decimal"></label>
           <label>Fecha<input name="date" type="date"></label>` : ""}
         <label>Nota (opcional)<input name="note" maxlength="200" placeholder="Por qué compro / vendo"></label>
         <p class="muted" id="t-estimate"></p>
@@ -458,13 +523,21 @@
       if (!q || !q.price_eur) return (out.textContent = "");
       const v = parseFloat((how === "eur" ? form.amount : form.qty).value);
       if (!v) return (out.textContent = "");
+      if (how === "have") {
+        const avg = parseFloat(String(form.avg?.value || "").replace(",", "."));
+        return (out.textContent = avg ? `Invertido ${eur(v * avg)} · ahora vale ≈ ${eur(v * q.price_eur)}` : "");
+      }
       const priceEur = real && form.price?.value ? parseFloat(form.price.value) / q.fx_eur : q.price_eur;
       out.textContent = how === "eur" ? `≈ ${fmt(v / priceEur, 4)} acciones + ${eur(d.fee_eur)} de comisión` : `≈ ${eur(v * priceEur)} + ${eur(d.fee_eur)} de comisión`;
     };
     const setHow = (h) => {
       how = h;
       form.querySelectorAll("[data-how]").forEach((x) => x.classList.toggle("active", x.dataset.how === h));
-      document.querySelector("#f-amount").hidden = h !== "eur"; document.querySelector("#f-qty").hidden = h !== "qty"; estimate();
+      document.querySelector("#f-amount").hidden = h !== "eur"; document.querySelector("#f-qty").hidden = h === "eur";
+      for (const id of ["#f-avg", "#f-have-help"]) { const e = document.querySelector(id); if (e) e.hidden = h !== "have"; }
+      const fp = document.querySelector("#f-price"); if (fp) fp.hidden = h === "have";
+      if (h === "have") { side = "buy"; form.querySelectorAll("[data-side]").forEach((x) => x.classList.toggle("active", x.dataset.side === "buy")); }
+      estimate();
     };
     try {
       const q = await api(`quote/${encodeURIComponent(ticker)}`);
@@ -483,7 +556,11 @@
       const v = Object.fromEntries(new FormData(form));
       const body = { ticker, side, note: v.note || null };
       if (how === "eur") body.amount_eur = parseFloat(v.amount); else body.qty = parseFloat(v.qty);
-      if (real) { if (v.price) body.price = parseFloat(v.price); if (v.date) body.date = v.date; }
+      if (real) {
+        if (how === "have") body.avg_eur = parseFloat(String(v.avg).replace(",", "."));
+        else if (v.price) body.price = parseFloat(v.price);
+        if (v.date) body.date = v.date;
+      }
       const btn = document.querySelector("#t-submit"); btn.disabled = true;
       try {
         const r = await api(`accounts/${S.current}/trades`, { method: "POST", body });
@@ -572,6 +649,7 @@
       bindPositions();
       const a = document.querySelector("#pf-alloc"); if (a) Charts.alloc(a, allocItems());
       if (S.hist) drawPortfolioChart();
+      loadRisk();
     }
     if (S.tab === "mercado") bindMercado();
   }

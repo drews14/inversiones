@@ -363,3 +363,24 @@ body.sim .tabbar:not(#sim-tabbar) { display: none; }
 .explain h4 { margin: 12px 0 6px; font-size: 14px; }
 .explain-trades { list-style: none; padding: 0; margin: 0 0 10px; font-size: 14px; }
 .explain-trades li { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line, rgba(127,127,127,.15)); }
+.live.warn { background: color-mix(in srgb, var(--down) 18%, transparent); color: var(--down); }
+.hero > span { display: block; }
+.muted.small { font-size: 13px; }
+
+/* Riesgo de la cartera: 5 niveles. Son estados (bueno → severo), con texto siempre visible, nunca solo color */
+.risk-card { padding-top: 6px; }
+.risk-global { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-weight: 600; }
+.risk-item { border-top: 1px solid var(--line, rgba(127,127,127,.15)); }
+.risk-item summary { display: flex; align-items: center; gap: 8px; padding: 12px 0; cursor: pointer; list-style: none; }
+.risk-item summary::-webkit-details-marker { display: none; }
+.ri-label { flex: 1; }
+.ri-val { color: var(--muted); font-size: 14px; }
+.risk-item p { margin: 0 0 10px; font-size: 14px; line-height: 1.45; }
+.ri-top { list-style: none; padding: 0; margin: 0 0 12px; font-size: 14px; }
+.ri-top li { display: flex; justify-content: space-between; padding: 3px 0; }
+.rlevel { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 8px; min-width: 64px; text-align: center; }
+.rlevel.r-0 { background: color-mix(in srgb, var(--up) 18%, transparent); color: var(--up); }
+.rlevel.r-1 { background: color-mix(in srgb, var(--up) 10%, transparent); color: var(--up); }
+.rlevel.r-2 { background: color-mix(in srgb, #d9a400 18%, transparent); color: #c99700; }
+.rlevel.r-3 { background: color-mix(in srgb, var(--down) 14%, transparent); color: var(--down); }
+.rlevel.r-4 { background: color-mix(in srgb, var(--down) 26%, transparent); color: var(--down); }
