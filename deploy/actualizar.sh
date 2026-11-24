@@ -23,6 +23,12 @@ if [ "${NEW_DATA:-0}" = 1 ] || { [ "$before" != "$after" ] && git diff --name-on
   sudo /usr/bin/systemctl restart inversiones-web.service
 fi
 
+# Modelo de «Mi cartera»: cron lo intenta cada 10 min de 6:30 a 13:59 en días laborables (diario.sh decide si toca)
+CRON="*/10 6-13 * * 1-5 /bin/bash $(pwd)/modelo/diario.sh"
+if command -v crontab >/dev/null && ! crontab -l 2>/dev/null | grep -qF "modelo/diario.sh"; then
+  ( crontab -l 2>/dev/null; echo "$CRON" ) | crontab -
+fi
+
 # ---- informe diario
 hoy=$(TZ=Europe/Madrid date +%F)
 dia=$(TZ=Europe/Madrid date +%u)
