@@ -384,3 +384,31 @@ body.sim .tabbar:not(#sim-tabbar) { display: none; }
 .rlevel.r-2 { background: color-mix(in srgb, #d9a400 18%, transparent); color: #c99700; }
 .rlevel.r-3 { background: color-mix(in srgb, var(--down) 14%, transparent); color: var(--down); }
 .rlevel.r-4 { background: color-mix(in srgb, var(--down) 26%, transparent); color: var(--down); }
+
+/* ---- modelo de «Mi cartera» (v17) */
+.seg-zones button { font-size: 13px; padding: 7px 2px; min-width: 0; white-space: nowrap; }
+.regime { display: flex; flex-direction: column; gap: 4px; border-left: 4px solid var(--muted); }
+.regime small { font-size: 12px; line-height: 1.35; }
+.regime.reg-ok { border-left-color: var(--up); }
+.regime.reg-no { border-left-color: var(--down); }
+.regimes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+.regimes > div { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.regimes > div b { font-weight: 600; }
+.regimes .reg-ok b { color: var(--up); }
+.regimes .reg-no b { color: var(--down); }
+.regimes small { grid-column: 1 / -1; font-size: 12px; }
+.m-h4 { font-size: 13px; margin: 14px 0 6px; color: var(--muted); font-weight: 600; }
+.conds { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.conds li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.conds li > b { flex: none; width: 28px; text-align: center; font-size: 12px; border-radius: 6px; padding: 2px 0; }
+.conds li.ok > b { background: var(--accent-soft); color: var(--up); }
+.conds li.ko > b { background: var(--warn-soft); color: var(--down); }
+.conds li span { display: flex; flex-direction: column; min-width: 0; }
+.conds li small { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.bars .fill.fill-risk { background: var(--down); }
+.fold summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.fold .kv { margin-top: 10px; }
+.m-table { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.m-tr { display: grid; grid-template-columns: 1.6fr repeat(6, 1fr); gap: 4px; align-items: center; }
+.m-tr b { text-align: center; font-weight: 600; }
+.m-th span { color: var(--muted); text-align: center; font-size: 11px; overflow: hidden; text-overflow: ellipsis; }

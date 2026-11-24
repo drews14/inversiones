@@ -1,13 +1,18 @@
 "use strict";
 
-const APP_VERSION = "16";
+const APP_VERSION = "17";
 
-const FLAG = { US: `<span class="mk">US</span>`, ES: `<span class="mk">ES</span>`, JP: `<span class="mk">JP</span>` };
+const FLAG = Object.fromEntries(["US", "ES", "EU", "JP", "AS"].map((m) => [m, `<span class="mk">${m}</span>`]));
+const ZONES = { US: "EE. UU.", ES: "España", EU: "Europa", JP: "Japón", AS: "Asia" };
+const ZONE_FULL = { US: "S&P 500 y Nasdaq 100", ES: "IBEX 35", EU: "Euro Stoxx y resto de Europa", JP: "Nikkei 225", AS: "China, Taiwán, Corea y Hong Kong" };
+// bloques del modelo (la nota de oportunidad y la de riesgo se forman con ellos)
+const MBLOCK = { tendencia: "Tendencia", momento: "Momento", calidad: "Calidad", valor: "Valor frente a su sector", analistas: "Analistas", flujo: "Flujo (cortos y recompras)" };
+const ESTADO_CLS = { "Señal de compra": "t-giro", "Rebote confirmado": "t-vigilar", "Esperar": "t-vigilar", "Riesgo alto": "r-alta" };
 const BLOCK_LABEL = { valuation: "Valoración", technical: "Sobreventa técnica", quality: "Calidad / fiabilidad", analysts: "Consenso analistas" };
 const TIMING = {
   giro: { text: "Señal de giro", cls: "t-giro", help: "Hay señales de que la caída se está frenando." },
   vigilar: { text: "Vigilar", cls: "t-vigilar", help: "Señales mixtas: buena candidata, pero aún sin confirmación clara." },
-  esperar: { text: "Esperar", cls: "t-esperar", help: "La caída todavía no muestra señales de frenar." },
+  esperar: { text: "Aún cayendo", cls: "t-esperar", help: "A muy corto plazo la caída todavía no muestra señales de frenar." },
 };
 const timingPill = (t) => (t && TIMING[t.label] ? `<span class="tpill ${TIMING[t.label].cls}">${TIMING[t.label].text}</span>` : "");
 const REC = { strong_buy: "Compra fuerte", buy: "Comprar", hold: "Mantener", underperform: "Infraponderar", sell: "Vender", none: "—" };
@@ -88,7 +93,7 @@ function oppRow(o, i) {
     <div class="opp-main">
       <div class="opp-head">
         <div style="min-width:0">
-          <div class="opp-tk">${FLAG[o.market] || ""} ${esc(o.ticker)} ${timingPill(o.timing)}</div>
+          <div class="opp-tk">${FLAG[o.market] || ""} ${esc(o.ticker)} ${o.model?.kind === "rebote" ? `<span class="tpill t-vigilar">Rebote</span>` : timingPill(o.timing)}</div>
           <div class="opp-name">${esc(o.name)}</div>
         </div>
         <div class="opp-price num">${money(o.price, o.currency)}<br><span class="${cls(o.chg1d)}">${pct(o.chg1d)}</span>
@@ -176,9 +181,10 @@ function openRiskDetail(o) {
       ${spark(o.spark)}
       <div class="muted" style="font-size:12px">Últimas 60 sesiones</div>
     </div>
-    <h2>Riesgo de caída ${infoBtn("risk")}</h2>
-    <div class="card"><div style="display:flex;align-items:center;gap:10px"><span class="tpill ${lcls}">${lvl}</span>
-      <span class="muted" style="font-size:13px">Venía mejor y ahora muestra señales de deterioro.</span></div>
+    ${modelBlock(o)}
+    <h2>${o.model ? "Por qué puede caer" : "Riesgo de caída"} ${infoBtn("risk")}</h2>
+    <div class="card"><div style="display:flex;align-items:center;gap:10px"><span class="tpill ${lcls}">${o.model ? "Riesgo alto" : lvl}</span>
+      <span class="muted" style="font-size:13px">${o.model ? "Tendencia bajista y sigue cayendo." : "Venía mejor y ahora muestra señales de deterioro."}</span></div>
       <ul class="reasons sig-neg">${k.signals.map((x, i) => `<li>${esc(x)}<br><small class="muted">${esc(k.plain[i] || "")}</small></li>`).join("")}</ul>
       ${o.risk_revisions_down ? `<ul class="reasons sig-neg"><li>Analistas bajando previsiones de beneficio<br><small class="muted">Los expertos esperan que gane menos que hace unas semanas.</small></li></ul>` : ""}
       ${(k.flags || []).length ? `<div class="when-good">${k.flags.map((f) => `<div>${esc(f)}</div>`).join("")}</div>` : ""}
@@ -194,7 +200,7 @@ function openRiskDetail(o) {
     </ul><small class="muted">Información general, no una recomendación personal.</small></div>
     <h2>Datos clave</h2>
     <div class="card kv num">
-      <div><span>Nota de oportunidad ${infoBtn("score")}</span><span>${Math.round(o.score)}/100</span></div>
+      ${o.score != null ? `<div><span>Nota de oportunidad ${infoBtn("score")}</span><span>${Math.round(o.score)}/100</span></div>` : ""}
       <div><span>Desde máx. 52s ${infoBtn("drawdown")}</span><span class="down">${pct(o.drawdown, 0)}</span></div>
       <div><span>vs MM200 ${infoBtn("sma200")}</span><span class="${cls(o.vs_sma200)}">${pct(o.vs_sma200)}</span></div>
       <div><span>RSI 14 ${infoBtn("rsi")}</span><span>${fmt(o.rsi, 0)}</span></div>
@@ -208,12 +214,43 @@ function openRiskDetail(o) {
       <a class="btn" href="https://finance.yahoo.com/quote/${encodeURIComponent(o.ticker)}" target="_blank" rel="noopener">Ver en Yahoo Finance</a>
     </div>
     ${(o.news || []).length ? `<h2>Noticias</h2>${newsList(o.news)}` : ""}
-    <p class="disclaimer">Datos de Yahoo Finance y Google News. Pueden tener retrasos o errores.</p>`);
+    <p class="disclaimer">${o.model ? "Nota del modelo con datos de StockAnalysis y FRED; precio y gráfica de Yahoo Finance; noticias de Google News." : "Datos de Yahoo Finance y Google News."} Pueden tener retrasos o errores.</p>`);
 }
 
 let currentList = [];
 function bindOpps(container, list, risk = false) {
   container.querySelectorAll(".opp").forEach((b) => b.addEventListener("click", () => (risk ? openRiskDetail : openDetail)(list[+b.dataset.i])));
+}
+
+const REG_ZONE = { US: "EE. UU.", ES: "España", EU: "Europa", JP: "Japón", AS: "Asia (Taiwán, Corea, Hong Kong, China)" };
+function regimeFor(m) { return (report.modelo?.regimen || {})[REG_ZONE[m]]; }
+function regimeCard() {
+  const R = report.modelo?.regimen || {};
+  return `<h2>Estado de cada mercado ${infoBtn("regimen")}</h2><div class="card regimes">${Object.keys(ZONES).map((m) => {
+    const z = R[REG_ZONE[m]];
+    return z ? `<div class="${z.ok ? "reg-ok" : "reg-no"}"><span>${ZONES[m]}</span><b>${z.ok ? "Favorable" : "Desfavorable"}</b></div>` : "";
+  }).join("")}<small class="muted">Con el mercado desfavorable el modelo no da señales de compra en esa zona.</small></div>`;
+}
+
+function modelBlock(o) {
+  const m = o.model;
+  if (!m) return "";
+  const risk = m.kind === "riesgo";
+  const conds = m.kind === "rebote" ? (m.rebote?.condiciones || []).map((c) => ({ ...c, corto: c.clave })) : (m.condiciones || []);
+  const bl = m.bloques || {};
+  return `<h2>${risk ? "Señal de venta del modelo" : "Señal del modelo"} ${infoBtn(risk ? "risk" : "score")}</h2>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="tpill ${ESTADO_CLS[m.estado] || ""}">${esc(m.estado)}</span>
+        <span class="muted" style="font-size:13px">${esc(m.tendencia || "")}${m.mantiene ? " · ya tenía la señal ayer y se mantiene" : ""}</span></div>
+      ${m.motivo ? `<p style="margin:10px 0 0">${esc(m.motivo)}</p>` : ""}
+      ${conds.length ? `<h4 class="m-h4">${risk ? "Condiciones" : `Condiciones de entrada · cumple ${conds.filter((c) => c.ok).length} de ${conds.length}`}</h4>
+        <ul class="conds">${conds.map((c) => `<li class="${c.ok ? "ok" : "ko"}"><b>${c.ok ? "Sí" : "No"}</b><span>${esc(String(c.corto || c.clave).replace(/^./, (x) => x.toUpperCase()))}<small>${esc(c.dato || "")}</small></span></li>`).join("")}</ul>` : ""}
+      ${!risk && m.stop ? `<div class="when-good">Salida del modelo: si pierde un <b>${m.stop} %</b> desde la compra (según lo que suele moverse), si la tendencia se rompe o si da señal de venta.</div>` : ""}
+    </div>
+    <h2>${risk ? "Bloques (al revés: más alto, peor)" : "De qué sale la nota"} ${infoBtn("bloques")}</h2>
+    <div class="card bars">${Object.keys(MBLOCK).map((k) => bl[k] == null ? "" : `<div class="bar"><div class="bar-top"><span>${MBLOCK[k]}${m.pesos && !risk ? ` <small class="muted">· pesa ${m.pesos[k]}</small>` : ""}</span><span class="num">${bl[k]}</span></div>
+      <div class="track"><div class="fill${risk ? " fill-risk" : ""}" style="width:${bl[k]}%"></div></div></div>`).join("")}
+      <small class="muted">Cada bloque es un percentil: 80 quiere decir que está mejor que el 80 % de las ~1.500 empresas analizadas${risk ? " (aquí, peor)" : ""}.${m.fecha ? ` Datos del cierre del ${new Date(m.fecha + "T12:00").toLocaleDateString("es-ES", { day: "numeric", month: "short" })}.` : ""}</small></div>`;
 }
 
 function renderHoy() {
@@ -231,11 +268,15 @@ function renderHoy() {
   html += waButton();
   const risk = listMode === "risk";
   const top5 = (risk ? r.risk_top || [] : r.top).slice(0, 5);
-  html += risk ? `<h2>Empiezan a caer ${infoBtn("risk")}</h2>` : `<h2>Las 5 mejores de hoy ${infoBtn("score")}</h2>`;
+  if (r.modelo) html += regimeCard();
+  html += risk ? `<h2>${r.modelo ? "Riesgo alto" : "Empiezan a caer"} ${infoBtn("risk")}</h2>` : `<h2>${r.modelo ? "Señal de compra" : "Las 5 mejores de hoy"} ${infoBtn("score")}</h2>`;
   html += top5.length ? `<div class="list" id="top-list">${top5.map(risk ? riskRow : oppRow).join("")}</div>`
-    : `<div class="card empty">${risk ? "Hoy ninguna empresa muestra señales claras de empezar a caer." : "Hoy ninguna empresa supera el umbral mínimo."}</div>`;
-  if (risk) html += `<p class="disclaimer">${r.risk_count ?? 0} empresas muestran señales de deterioro hoy. Aquí ves las que más señales acumulan. Las que ya se han desplomado no aparecen aquí.</p>`;
-  html += `<p class="disclaimer">Analizadas ${r.analyzed} de ${r.universe_size} empresas · ${r.candidates} superan el umbral.
+    : `<div class="card empty">${risk ? "Hoy ninguna empresa muestra señales claras de empezar a caer." : r.modelo ? "Hoy ninguna empresa cumple todas las condiciones de compra." : "Hoy ninguna empresa supera el umbral mínimo."}</div>`;
+  if (!risk && r.modelo && r.top.length > 5) html += `<p class="disclaimer">Hay ${r.top.length} con señal de compra: las demás, en Mercados.</p>`;
+  if (risk) html += r.modelo ? `<p class="disclaimer">${r.risk_count ?? 0} empresas con riesgo alto hoy. Aquí ves las de nota más alta, primero las de EE. UU. y Europa; el resto, en Mercados.</p>`
+    : `<p class="disclaimer">${r.risk_count ?? 0} empresas muestran señales de deterioro hoy. Aquí ves las que más señales acumulan. Las que ya se han desplomado no aparecen aquí.</p>`;
+  html += r.modelo ? `<p class="disclaimer">Modelo ${esc(r.modelo.version || "")} sobre ${r.analyzed} empresas · ${r.candidates} con señal de compra.`
+    : `<p class="disclaimer">Analizadas ${r.analyzed} de ${r.universe_size} empresas · ${r.candidates} superan el umbral.
     Esto es un filtro automático según tus criterios, no una recomendación de inversión. Revisa siempre cada empresa antes de decidir.
     <br>Versión de la app: ${APP_VERSION}</p>`;
   el.innerHTML = html;
@@ -248,13 +289,26 @@ function renderMercados() {
   const el = $("#tab-mercados");
   const risk = listMode === "risk";
   const list = (risk ? report.risk_by_market : report.by_market)?.[marketSel] || [];
-  el.innerHTML = `${modeSeg()}<div class="seg">${["US", "ES", "JP"].map((m) => `<button data-m="${m}" class="${m === marketSel ? "active" : ""}">${{ US: "EE. UU.", ES: "España", JP: "Japón" }[m]}</button>`).join("")}</div>
-    <h2>${risk ? "Empiezan a caer en" : "Mejores de"} ${{ US: "S&P 500 / Nasdaq 100", ES: "IBEX 35", JP: "Nikkei 225" }[marketSel]}</h2>
-    ${list.length ? `<div class="list" id="mk-list">${list.map(risk ? riskRow : oppRow).join("")}</div>` : `<div class="card empty">${risk ? "Ninguna muestra señales claras de caída hoy." : "Sin candidatas hoy."}</div>`}`;
+  const M = report.modelo;
+  const zones = M ? Object.keys(ZONES) : ["US", "ES", "JP"];
+  if (!zones.includes(marketSel)) marketSel = "US";
+  const reg = M ? regimeFor(marketSel) : null;
+  const esperar = M && !risk ? (M.esperar || []).filter((e) => e.market === marketSel || (marketSel === "JP" && e.region === "Asia")) : [];
+  const reb = M && !risk ? (M.rebotes || []).filter((x) => x.market === marketSel) : [];
+  el.innerHTML = `${modeSeg()}<div class="seg seg-zones">${zones.map((m) => `<button data-m="${m}" class="${m === marketSel ? "active" : ""}">${ZONES[m]}</button>`).join("")}</div>
+    ${reg ? `<div class="card regime ${reg.ok ? "reg-ok" : "reg-no"}"><div><b>${reg.ok ? "Mercado favorable" : "Mercado desfavorable"}</b> ${infoBtn("regimen")}</div><small class="muted">${esc(reg.dato)}</small></div>` : ""}
+    <h2>${risk ? (M ? "Riesgo alto en" : "Empiezan a caer en") : (M ? "Señal de compra en" : "Mejores de")} ${M ? ZONE_FULL[marketSel] : { US: "S&P 500 / Nasdaq 100", ES: "IBEX 35", JP: "Nikkei 225" }[marketSel]}</h2>
+    ${list.length ? `<div class="list" id="mk-list">${list.map(risk ? riskRow : oppRow).join("")}</div>` : `<div class="card empty">${risk ? "Ninguna con señal de venta hoy." : M ? "Hoy ninguna cumple todas las condiciones de compra." : "Sin candidatas hoy."}</div>`}
+    ${reb.length ? `<h2>Rebote confirmado · experimental ${infoBtn("rebote")}</h2><div class="list" id="reb-list">${reb.map(oppRow).join("")}</div>
+      <p class="disclaimer">Empresas buenas y baratas que han caído un 25 % o más y empiezan a girarse. En la prueba con el pasado aciertan menos que la señal de compra: si se usan, con menos dinero.</p>` : ""}
+    ${esperar.length ? `<details class="card fold"><summary>Cerca de la señal (${esperar.length}) · nota 60–69</summary><div class="kv num">${esperar.map((e) => `<div><span>${esc(e.nombre)}</span><span>${e.puntuacion}</span></div>`).join("")}</div></details>` : ""}
+    ${risk && M ? `<p class="disclaimer">${M.n_riesgo} empresas con riesgo alto en total. Aquí ves las ${list.length} de nota más alta de esta zona.</p>` : ""}`;
   bindModeSeg(el);
   el.querySelectorAll(".seg:not(.seg-mode) button").forEach((b) => b.addEventListener("click", () => { marketSel = b.dataset.m; renderMercados(); }));
   const l = $("#mk-list");
   if (l) bindOpps(l, list, risk);
+  const rl = $("#reb-list");
+  if (rl) bindOpps(rl, reb, false);
 }
 
 function newsList(items) {
@@ -339,11 +393,11 @@ function openDetail(o) {
       ${o.timing.negative.length ? `<ul class="reasons sig-neg">${o.timing.negative.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
       ${(o.basic?.when_good || []).length ? `<div class="when-good"><b>Sería mejor momento:</b><ul class="reasons">${o.basic.when_good.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
     </div>` : ""}
-    <h2>Por qué aparece</h2>
+    ${o.model ? modelBlock(o) : `<h2>Por qué aparece</h2>
     <div class="card">${(o.reasons || []).length ? `<ul class="reasons">${o.reasons.map((r) => `<li>${esc(r)}</li>`).join("")}</ul>` : `<span class="muted">Puntuación equilibrada en todos los bloques.</span>`}</div>
     <h2>Desglose de la nota ${infoBtn("score")}</h2>
     <div class="card bars">${Object.keys(BLOCK_LABEL).map((k) => `<div class="bar"><div class="bar-top"><span>${BLOCK_LABEL[k]} ${infoBtn(k)}</span><span class="num">${fmt(b[k], 1)} / ${max[k]}</span></div>
-      <div class="track"><div class="fill" style="width:${Math.min(100, ((b[k] || 0) / max[k]) * 100)}%"></div></div></div>`).join("")}</div>
+      <div class="track"><div class="fill" style="width:${Math.min(100, ((b[k] || 0) / max[k]) * 100)}%"></div></div></div>`).join("")}</div>`}
     ${targetBlock(o)}
     <h2>Datos clave</h2>
     <div class="card kv num">
@@ -364,7 +418,7 @@ function openDetail(o) {
       <a class="btn" href="https://finance.yahoo.com/quote/${encodeURIComponent(o.ticker)}" target="_blank" rel="noopener">Ver en Yahoo Finance</a>
     </div>
     ${(o.news || []).length ? `<h2>Noticias</h2>${newsList(o.news)}` : ""}
-    <p class="disclaimer">Datos de Yahoo Finance, FRED y Google News. Pueden tener retrasos o errores.</p>`;
+    <p class="disclaimer">${o.model ? "Nota del modelo con datos de StockAnalysis y FRED; precio y gráfica de Yahoo Finance; noticias de Google News." : "Datos de Yahoo Finance, FRED y Google News."} Pueden tener retrasos o errores.</p>`;
   openSheetShell();
 }
 
@@ -523,7 +577,39 @@ const TIMING_RULES = [
   ["Analistas bajando previsiones de beneficio", "−1"],
 ];
 
+function renderMetodoModelo() {
+  const M = report.modelo;
+  const WZ = [["EE. UU.", [20, 25, 20, 10, 15, 10]], ["Europa y España", [20, 25, 20, 20, 10, 5]], ["Japón", [20, 10, 15, 35, 15, 5]], ["Asia sin Japón", [15, 25, 20, 25, 10, 5]]];
+  let html = `<h2>Cómo funciona el modelo ${infoBtn("score")}</h2><div class="card"><p class="m-p">${esc(M.universo || "")}</p>
+    <p class="m-p">Es el modelo de «Mi cartera» (${esc(M.version || "v3")}). Cada mañana descarga las fichas de StockAnalysis y el estado del mercado de FRED, y pone dos notas a cada empresa: <b>oportunidad</b> y <b>riesgo de caída</b>.</p></div>
+    <h2>La escala</h2><div class="card kv"><div><span>70 o más</span><span>Señal de compra (85+, fuerte)</span></div><div><span>60–69</span><span>Esperar</span></div><div><span>50–59</span><span>Vigilar</span></div>
+      <div><span>Riesgo 70 o más</span><span>Señal de venta o salida</span></div></div>
+    <h2>Seis bloques ${infoBtn("bloques")}</h2><div class="card"><p class="m-p">Pesos por zona, según los datos públicos de factores (Kenneth French y AQR):</p>
+      <div class="m-table"><div class="m-tr m-th"><span></span>${Object.values(MBLOCK).map((b) => `<span>${b.split(" ")[0]}</span>`).join("")}</div>
+      ${WZ.map(([z, w]) => `<div class="m-tr"><span>${z}</span>${w.map((x) => `<b class="num">${x}</b>`).join("")}</div>`).join("")}</div>
+      <p class="m-p" style="margin-top:8px">Mientras no haya 30 días de archivo para medir revisiones de previsiones, los analistas pesan la mitad.</p></div>
+    <h2>Condiciones de compra (cada una que falla pone un tope)</h2><div class="card kv">
+      <div><span>Tendencia de fondo sana</span><span>si no, máx. 49</span></div><div><span>Valoración fiable (ni cíclica en pico ni riesgo de quiebra)</span><span>máx. 59</span></div>
+      <div><span>Precio sobre su media de 50 (giro)</span><span>máx. 64</span></div><div><span>Va mejor que su índice</span><span>máx. 64</span></div>
+      <div><span>Datos de 5 días o menos</span><span>máx. 64</span></div><div><span>Sin resultados en 7 días</span><span>máx. 64</span></div>
+      <div><span>Mercado favorable en su zona ${infoBtn("regimen")}</span><span>máx. 69</span></div><div><span>Atractivo de 70 o más sin filtros</span><span>máx. 69</span></div></div>
+    <div class="card"><ul class="reasons"><li>Se descartan las de rentabilidad muy baja (ROIC y ROE &lt; 5 %), deuda muy alta o datos de más de 21 días.</li>
+      <li>Una señal ya dada se mantiene mientras la nota no baje de 60 y la tendencia siga sana.</li>
+      <li><b>Salida:</b> riesgo de 70 o más, más de un 10 % bajo su media de 200, tendencia bajista o pérdida mayor que su stop (entre el 8 y el 25 % según lo que se mueve cada valor).</li></ul></div>
+    <h2>Riesgo de caída</h2><div class="card"><p class="m-p">Lo contrario de la oportunidad, con más peso a tendencia y momento negativos. Exige tendencia bajista (si no, máx. 59) y que siga por debajo de su media de 50 (si no, máx. 64). Con el mercado desfavorable suma 5 puntos.</p></div>
+    <h2>Rebote confirmado ${infoBtn("rebote")}</h2><div class="card"><p class="m-p">Lista experimental: solo en este modo, nunca en el básico.</p></div>
+    <h2>Momento de entrada ${infoBtn("timing")}</h2><div class="card"><p class="m-p">Lo añade esta app encima del modelo, sin cambiar su nota: mira si la acción está frenando o acelerando a muy corto plazo.</p>
+      <p class="m-p">${timingPill({ label: "giro" })} · ${timingPill({ label: "vigilar" })} · ${timingPill({ label: "esperar" })}</p></div>
+    <h2>Limitaciones</h2><div class="card"><ul class="reasons">
+      <li>La ventaja medida es pequeña y relativa: con señal bate a su índice algo más a menudo (58 % frente a 56 % en 2012–2019; 53 % frente a 51 % desde 2020), pero no sube más a menudo en absoluto.</li>
+      <li>La prueba con el pasado solo usa grandes empresas de EE. UU. que existen hoy (sesgo de supervivencia) y datos mensuales.</li>
+      <li>Datos gratuitos (StockAnalysis, FRED, Yahoo Finance): pueden tener errores o retrasos.</li>
+      <li>Es un filtro para decidir qué mirar, no una recomendación de compra.</li></ul></div>`;
+  $("#tab-metodo").innerHTML = html;
+}
+
 function renderMetodo() {
+  if (report.modelo) return renderMetodoModelo();
   const W = report.weights || { valuation: 25, technical: 25, quality: 25, analysts: 25 };
   const MW = report.market_weight || { US: 1, ES: 0.92, JP: 0.88 };
   const pts = (x) => (Math.round(x * 10) / 10).toLocaleString("es-ES");
@@ -557,7 +643,7 @@ function renderMetodo() {
 }
 
 // --- Vista básica (lenguaje sencillo, sin cifras)
-const COUNTRY = { US: "Estados Unidos", ES: "España", JP: "Japón" };
+const COUNTRY = { US: "Estados Unidos", ES: "España", EU: "Europa", JP: "Japón", AS: "Asia" };
 const LEVEL3 = { baja: 1, media: 2, alta: 3, bajo: 1, medio: 2, alto: 3 };
 
 function meter(label, value, kind) {
@@ -598,7 +684,21 @@ function renderBasico() {
       ${o.isin ? trButton(o.isin) : ""}
     </article>`;
   }
-  html += `<details class="b-card b-how"><summary>¿Cómo elige la app estas empresas?</summary>
+  const fall = r.modelo ? (r.risk_top || []).filter((o) => ["US", "ES", "EU"].includes(o.market)).slice(0, 3) : [];
+  if (fall.length) {
+    html += `<h2 class="b-h2">Cuidado: estas siguen cayendo</h2><div class="b-card"><p>Si tienes alguna, revisa si te conviene seguir con ella.</p>
+      <ul class="b-list warn">${fall.map((o) => `<li><b>${esc(String(o.short || o.name))}</b> (${COUNTRY[o.market]}): ${esc(((o.risk.plain || [])[0] || "lleva tiempo bajando y no para").replace(/^./, (c) => c.toLowerCase()))}</li>`).join("")}</ul></div>`;
+  }
+  html += r.modelo ? `<details class="b-card b-how"><summary>¿Cómo elige la app estas empresas?</summary>
+    <p>Cada día revisa unas 1.500 empresas grandes de Estados Unidos, Europa, Japón y Asia. Solo enseña las que cumplen a la vez todo esto:</p>
+    <ul class="b-list yes">
+      <li><b>Lleva tiempo subiendo</b> y lo hace mejor que su bolsa.</li>
+      <li><b>Es un buen negocio</b> y no está cara comparada con empresas parecidas.</li>
+      <li><b>Su bolsa va bien</b>: si el mercado está mal, espera.</li>
+      <li><b>No presenta cuentas</b> en los próximos días y sus datos son recientes.</li>
+    </ul>
+    <p>Las de «Cuidado» son lo contrario: llevan meses bajando y siguen cayendo.</p>
+  </details>` : `<details class="b-card b-how"><summary>¿Cómo elige la app estas empresas?</summary>
     <p>Cada día revisa unas 780 empresas grandes de Estados Unidos, España y Japón y les pone una nota mirando cuatro cosas, de más a menos importante:</p>
     <ul class="b-list yes">
       <li><b>Si es un buen negocio:</b> que gane dinero, que no tenga muchas deudas y que crezca.</li>

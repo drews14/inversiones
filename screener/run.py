@@ -26,6 +26,7 @@ import yfinance as yf
 sys.path.insert(0, str(Path(__file__).parent))
 import config as C  # noqa: E402
 import basic  # noqa: E402
+import modelo  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 # En el portátil el informe se guarda fuera del repositorio (INFORME_DIR) para que «git pull» no choque con él.
@@ -514,7 +515,7 @@ def find_isin(r, cache):
         good = []
         for _, kw in entries:
             parts = kw.split("|")
-            if len(parts) > 1 and parts[1][:2] in ISIN_PREFIX[r["market"]] and isin_ok(parts[1]):
+            if len(parts) > 1 and parts[1][:2] in (r.get("isin_prefix") or ISIN_PREFIX[r["market"]]) and isin_ok(parts[1]):
                 good.append(parts)
         # preferimos la que coincide con el ticker; si no, la primera del país correcto
         exact = [p for p in good if base in (p[0].upper(), p[-1].upper())]
@@ -550,6 +551,52 @@ def notify(report):
 
 
 # ---------------------------------------------------------------- principal
+def enrich_model(buys, risks, benchmarks, isins):
+    """Completa las empresas del modelo con precio y gráfica de Yahoo, momento de entrada, noticias, ISIN y textos sencillos."""
+    seen, allr = set(), []
+    for x in buys + risks:
+        if id(x) not in seen:
+            seen.add(id(x)); allr.append(x)
+    tks = sorted({x["ticker"] for x in allr})
+    try:
+        prices, volumes = load_prices(tks)
+    except Exception as e:
+        print("Modelo: sin precios de Yahoo", e); prices, volumes = pd.DataFrame(), pd.DataFrame()
+    infos = load_infos(tks)
+    buy_ids = {id(x) for x in buys}
+    for r in allr:
+        tk = r["ticker"]
+        close = prices[tk].dropna() if tk in prices else pd.Series(dtype=float)
+        t = technicals(close) if len(close) else None
+        if t:
+            r.update({k: t[k] for k in ("price", "chg1d", "chg1m", "rsi", "vs_sma200", "drawdown", "spark")})
+        info = infos.get(tk, {})
+        r.update(target_low=num(info.get("targetLowPrice")), target_high=num(info.get("targetHighPrice")),
+                 recommendation=info.get("recommendationKey"), pe=num(info.get("forwardPE")) or num(info.get("trailingPE")),
+                 roe=num(info.get("returnOnEquity")))
+        r["target"] = r.get("target") or num(info.get("targetMeanPrice"))
+        b = (r.get("model") or {}).get("bloques") or {}
+        r["blocks"] = {"valuation": (b.get("valor") or 0) / 100 * C.WEIGHTS["valuation"], "quality": (b.get("calidad") or 0) / 100 * C.WEIGHTS["quality"],
+                       "analysts": (b.get("analistas") or 0) / 100 * C.WEIGHTS["analysts"], "technical": (b.get("momento") or 0) / 100 * C.WEIGHTS["technical"]}
+        r["news"] = company_news(r)
+        r["isin"] = find_isin(r, isins)
+        name = r["short"] if r["market"] == "ES" else str(r["name"]).split(",")[0]
+        kw = " ".join(basic.keywords(name)) or name
+        news_es = news_for(f'"{kw}" acciones', 6, "es")
+        if id(r) in buy_ids:
+            bench = benchmarks.get(r["market"])
+            if t:
+                r["timing"] = timing(close, volumes[tk] if tk in volumes else pd.Series(dtype=float), bench, info, eps_revisions(tk))
+            bench_1m = float(bench.iloc[-1] / bench.iloc[-22] - 1) if bench is not None and len(bench) > 22 else None
+            r["basic"] = basic.company({**r, "name": name}, info, close, news_es, bench_1m)
+        else:
+            news_es = basic.relevant(news_es, name, tk)
+            rev = eps_revisions(tk)
+            r["risk_news_es"] = news_es[:3]
+            r["risk_bad_news"] = [n["title"] for n in news_es if basic.news_tone([n]) == "malas"][:2]
+            r["risk_revisions_down"] = bool(rev and rev[1] > rev[0] * 1.5 and rev[1] >= 3)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, help="analizar solo N empresas (pruebas)")
@@ -649,6 +696,20 @@ def main():
         r.update({k: v for k, v in shown[tk].items() if k not in ("timing", "basic")})
     save_isin_cache(isins)
 
+    # ---- Modelo de «Mi cartera» (v3): si hay listas recientes, ellas deciden qué empresas salen
+    mdl = modelo.load(now.date())
+    model_summary = None
+    if mdl:
+        o_m, r_m = mdl
+        top_m, reb_m, risk_m, risk_bm, by_m, n_risk = modelo.lists(o_m, r_m)
+        enrich_model(top_m + reb_m, risk_m + [x for v in risk_bm.values() for x in v], benchmarks, isins)
+        save_isin_cache(isins)
+        top_records, by_market, risk_top, risk_by_market = top_m, by_m, risk_m, risk_bm
+        model_summary = modelo.summary(o_m, r_m)
+        model_summary["rebotes"] = reb_m
+        model_summary["n_compra"], model_summary["n_riesgo"] = len(top_m), n_risk
+        print(f"Modelo {o_m['fecha']}: {len(top_m)} señales de compra, {len(reb_m)} rebotes, {n_risk} en riesgo alto")
+
     markets = macro_panel()
     report = {
         "generated_at": now.isoformat(),
@@ -667,9 +728,13 @@ def main():
         "top": top_records,
         "risk_top": risk_top,
         "risk_by_market": risk_by_market,
-        "risk_count": int(len(rk)),
+        "risk_count": int(len(rk)) if not model_summary else model_summary["n_riesgo"],
         "by_market": by_market,
+        "modelo": model_summary,
     }
+    if model_summary:
+        report["universe_size"] = report["analyzed"] = int(re.match(r"\d+", model_summary.get("universo") or "0").group() or 0) or len(tickers)
+        report["candidates"] = model_summary["n_compra"]
     report["basic_market"] = basic.market(report)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "history").mkdir(exist_ok=True)

@@ -126,6 +126,10 @@ def company(r, info, close, news_es, bench_chg1m=None):
         no.append("Cotiza en dólares: si el dólar baja frente al euro, se gana menos (y al revés).")
     elif r.get("market") == "JP":
         no.append("Cotiza en yenes: los cambios de moneda también influyen en lo que se gana o se pierde.")
+    elif r.get("currency") and r.get("currency") not in ("EUR", "€"):
+        no.append(f"Cotiza en {r['currency']}, no en euros: los cambios de moneda también influyen en lo que se gana o se pierde.")
+    if r.get("market") == "AS":
+        no.append("Es una bolsa asiática: muchos brókers no dejan comprarla y las noticias llegan con menos detalle.")
 
     # ---- ¿Por qué ha bajado?
     fall = []

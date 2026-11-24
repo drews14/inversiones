@@ -34,7 +34,10 @@ hoy=$(TZ=Europe/Madrid date +%F)
 dia=$(TZ=Europe/Madrid date +%u)
 hora=$(TZ=Europe/Madrid date +%H%M)
 intentos="$DATOS/intentos-$hoy"
-if [ "$dia" -le 5 ] && [ "$hora" -ge 700 ] && [ "$hora" -lt 1300 ] \
+# Espera a que termine el modelo de las 6:30 (hecho-HOY); si a las 9:30 no ha terminado, sale sin él
+modelo_listo=0
+if [ -f "$DATOS/modelo/hecho-$hoy" ] || [ "$hora" -ge 930 ]; then modelo_listo=1; fi
+if [ "$dia" -le 5 ] && [ "$hora" -ge 700 ] && [ "$hora" -lt 1300 ] && [ "$modelo_listo" = 1 ] \
    && [ ! -f "$INFORME_DIR/history/$hoy.json" ] && [ "$(cat "$intentos" 2>/dev/null || echo 0)" -lt 4 ]; then
   echo $(( $(cat "$intentos" 2>/dev/null || echo 0) + 1 )) > "$intentos"
   find "$DATOS" -maxdepth 1 -name 'intentos-*' ! -name "intentos-$hoy" -delete 2>/dev/null || true
